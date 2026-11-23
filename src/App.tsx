@@ -309,7 +309,7 @@ export const App: React.FC = () => {
         onOpenQueue={() => setQueueOpen(true)}
       />
 
-      <div className="flex-1">
+      <main className="flex-1">
         {route === '/' && (
           <HomeVault
             activePothiId={activePothiId}
@@ -360,7 +360,7 @@ export const App: React.FC = () => {
             onLaunchPresenterWithItem={handleLaunchPresenterWithItem}
           />
         )}
-      </div>
+      </main>
 
       <Footer onNavigate={navigate} />
 

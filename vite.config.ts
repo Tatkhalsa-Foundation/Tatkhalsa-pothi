@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
+  base: '/',
   plugins: [react(), tailwindcss()],
   resolve: {
     dedupe: ['react', 'react-dom'],
@@ -26,14 +27,27 @@ export default defineConfig({
     target: 'es2022',
     rollupOptions: {
       output: {
-        manualChunks: {
-          'vendor-react': ['react', 'react-dom'],
-          'vendor-icons': ['lucide-react'],
-          'corpus-gurbani': [
-            './src/data/gurbaniCorpus.ts',
-            './src/data/sampardaiPothis.ts',
-            './src/data/nitnemBaanis.ts',
-          ],
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (id.includes('lucide-react')) {
+              return 'vendor-icons';
+            }
+            if (
+              id.includes('/react/') ||
+              id.includes('/react-dom/') ||
+              id.includes('/scheduler/')
+            ) {
+              return 'vendor-react';
+            }
+          }
+          if (
+            id.includes('/src/data/gurbaniCorpus') ||
+            id.includes('/src/data/sampardaiPothis') ||
+            id.includes('/src/data/nitnemBaanis')
+          ) {
+            return 'corpus-gurbani';
+          }
+          return undefined;
         },
       },
     },

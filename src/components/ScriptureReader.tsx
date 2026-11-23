@@ -562,7 +562,7 @@ export const ScriptureReader: React.FC<ScriptureReaderProps> = ({
       />
 
       {/* Main Scripture Reading Surface */}
-      <main className="rounded-2xl border pothi-divider pothi-surface p-6 sm:p-10 space-y-6">
+      <article className="rounded-2xl border pothi-divider pothi-surface p-6 sm:p-10 space-y-6">
         <header className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-5 border-b pothi-divider">
           <div className="space-y-1.5">
             <p className="text-xs text-[var(--ink-muted)]">{resolved.metaLine}</p>
@@ -667,7 +667,7 @@ export const ScriptureReader: React.FC<ScriptureReaderProps> = ({
             </div>
           </div>
         )}
-      </main>
+      </article>
     </div>
   );
 };

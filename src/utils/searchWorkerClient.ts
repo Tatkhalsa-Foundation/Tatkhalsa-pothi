@@ -23,7 +23,14 @@ let fallbackIndex: ReturnType<typeof buildSearchIndex> | null = null;
 export class GurbaniSearchClient {
   private worker: Worker | null = null;
   private nextRequestId = 1;
-  private pending = new Map<number, (outcome: WorkerSearchOutcome) => void>();
+  private pending = new Map<
+    number,
+    {
+      query: string;
+      granthFilter: GranthId | 'all';
+      resolve: (outcome: WorkerSearchOutcome) => void;
+    }
+  >();
 
   constructor() {
     if (typeof window !== 'undefined' && typeof Worker !== 'undefined') {
@@ -34,20 +41,45 @@ export class GurbaniSearchClient {
         );
         this.worker.onmessage = (event: MessageEvent<SearchWorkerResponse>) => {
           const { requestId, results, directAng, elapsedMs } = event.data;
-          const resolver = this.pending.get(requestId);
-          if (resolver) {
+          const entry = this.pending.get(requestId);
+          if (entry) {
             this.pending.delete(requestId);
-            resolver({ results, directAng, elapsedMs, usedWorker: true });
+            entry.resolve({ results, directAng, elapsedMs, usedWorker: true });
           }
         };
         this.worker.onerror = () => {
           this.worker?.terminate();
           this.worker = null;
+          // Flush any in-flight searches through the synchronous fallback
+          const queued = Array.from(this.pending.values());
+          this.pending.clear();
+          queued.forEach((entry) => {
+            entry.resolve(this.runFallbackSearch(entry.query, entry.granthFilter));
+          });
         };
       } catch {
         this.worker = null;
       }
     }
+  }
+
+  private runFallbackSearch(
+    query: string,
+    granthFilter: GranthId | 'all',
+  ): WorkerSearchOutcome {
+    const startedAt = performance.now();
+    if (!fallbackIndex) {
+      fallbackIndex = buildSearchIndex(GURBANI_CORPUS);
+    }
+    const results = searchCorpus(query, granthFilter, GURBANI_CORPUS, fallbackIndex);
+    const directAng = parseDirectAngQuery(query);
+    const elapsedMs = Math.max(0.1, Number((performance.now() - startedAt).toFixed(2)));
+    return {
+      results,
+      directAng,
+      elapsedMs,
+      usedWorker: false,
+    };
   }
 
   public search(
@@ -57,25 +89,13 @@ export class GurbaniSearchClient {
     if (this.worker) {
       const requestId = this.nextRequestId++;
       return new Promise((resolve) => {
-        this.pending.set(requestId, resolve);
+        this.pending.set(requestId, { query, granthFilter, resolve });
         const payload: SearchWorkerRequest = { requestId, query, granthFilter };
         this.worker?.postMessage(payload);
       });
     }
 
-    const startedAt = performance.now();
-    if (!fallbackIndex) {
-      fallbackIndex = buildSearchIndex(GURBANI_CORPUS);
-    }
-    const results = searchCorpus(query, granthFilter, GURBANI_CORPUS, fallbackIndex);
-    const directAng = parseDirectAngQuery(query);
-    const elapsedMs = Math.max(0.1, Number((performance.now() - startedAt).toFixed(2)));
-    return Promise.resolve({
-      results,
-      directAng,
-      elapsedMs,
-      usedWorker: false,
-    });
+    return Promise.resolve(this.runFallbackSearch(query, granthFilter));
   }
 
   public dispose(): void {
