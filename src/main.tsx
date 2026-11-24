@@ -1,5 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { registerSW } from 'virtual:pwa-register';
 import './index.css';
 import App from './App';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -46,17 +47,7 @@ window.addEventListener(
   true,
 );
 
-// Unregister any leftover Service Workers and legacy caches on startup
-if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-  navigator.serviceWorker
-    .getRegistrations()
-    .then((registrations) => {
-      registrations.forEach((registration) => {
-        registration.unregister().catch(() => {});
-      });
-    })
-    .catch(() => {});
-}
+// Purge obsolete legacy cache namespaces from older versions while keeping Workbox PWA caches
 if (typeof window !== 'undefined' && 'caches' in window) {
   window.caches
     .keys()
@@ -68,6 +59,16 @@ if (typeof window !== 'undefined' && 'caches' in window) {
         });
     })
     .catch(() => {});
+}
+
+// Register auto-updating Workbox PWA Service Worker for offline Sundar Gutka & Pothi access
+if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+  registerSW({
+    immediate: true,
+    onRegisterError() {
+      // Non-fatal in preview iframes or restricted environments
+    },
+  });
 }
 
 const rootEl = document.getElementById('root');

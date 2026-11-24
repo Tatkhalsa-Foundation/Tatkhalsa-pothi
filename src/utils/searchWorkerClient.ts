@@ -1,4 +1,4 @@
-import { GURBANI_CORPUS } from '../data/gurbaniCorpus';
+import { FULL_CORPUS_STATS, FULL_SEARCH_CORPUS } from '../data/fullSearchCorpus';
 import {
   buildSearchIndex,
   parseDirectAngQuery,
@@ -16,6 +16,8 @@ export interface WorkerSearchOutcome {
   directAng: DirectAngTarget | null;
   elapsedMs: number;
   usedWorker: boolean;
+  indexedShabads: number;
+  indexedTuks: number;
 }
 
 let fallbackIndex: ReturnType<typeof buildSearchIndex> | null = null;
@@ -40,17 +42,30 @@ export class GurbaniSearchClient {
           { type: 'module' },
         );
         this.worker.onmessage = (event: MessageEvent<SearchWorkerResponse>) => {
-          const { requestId, results, directAng, elapsedMs } = event.data;
+          const {
+            requestId,
+            results,
+            directAng,
+            elapsedMs,
+            indexedShabads,
+            indexedTuks,
+          } = event.data;
           const entry = this.pending.get(requestId);
           if (entry) {
             this.pending.delete(requestId);
-            entry.resolve({ results, directAng, elapsedMs, usedWorker: true });
+            entry.resolve({
+              results,
+              directAng,
+              elapsedMs,
+              usedWorker: true,
+              indexedShabads,
+              indexedTuks,
+            });
           }
         };
         this.worker.onerror = () => {
           this.worker?.terminate();
           this.worker = null;
-          // Flush any in-flight searches through the synchronous fallback
           const queued = Array.from(this.pending.values());
           this.pending.clear();
           queued.forEach((entry) => {
@@ -69,9 +84,9 @@ export class GurbaniSearchClient {
   ): WorkerSearchOutcome {
     const startedAt = performance.now();
     if (!fallbackIndex) {
-      fallbackIndex = buildSearchIndex(GURBANI_CORPUS);
+      fallbackIndex = buildSearchIndex(FULL_SEARCH_CORPUS);
     }
-    const results = searchCorpus(query, granthFilter, GURBANI_CORPUS, fallbackIndex);
+    const results = searchCorpus(query, granthFilter, FULL_SEARCH_CORPUS, fallbackIndex);
     const directAng = parseDirectAngQuery(query);
     const elapsedMs = Math.max(0.1, Number((performance.now() - startedAt).toFixed(2)));
     return {
@@ -79,6 +94,8 @@ export class GurbaniSearchClient {
       directAng,
       elapsedMs,
       usedWorker: false,
+      indexedShabads: FULL_CORPUS_STATS.totalShabads,
+      indexedTuks: FULL_CORPUS_STATS.totalTuks,
     };
   }
 

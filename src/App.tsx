@@ -3,15 +3,19 @@ import { Footer } from './components/Footer';
 import { GurbaniSearcher } from './components/GurbaniSearcher';
 import { HomeVault } from './components/HomeVault';
 import { Navbar } from './components/Navbar';
+import { OfflineIndicator } from './components/PWAInstallButton';
 import { PresenterMode } from './components/PresenterMode';
 import { QueueDrawer } from './components/QueueDrawer';
 import { ScriptureReader } from './components/ScriptureReader';
 import { SundarGutka } from './components/SundarGutka';
+import { FULL_SEARCH_CORPUS } from './data/fullSearchCorpus';
 import { GRANTH_CATALOG } from './data/gurbaniCorpus';
 import type {
   AppRoute,
   BaaniCollection,
+  BookmarkItem,
   GranthId,
+  HistoryEntry,
   QueueItem,
   ReaderSettings,
   ReaderTarget,
@@ -24,9 +28,13 @@ import {
   DEFAULT_READER_SETTINGS,
   DEFAULT_SEHAJ_PROGRESS,
   enqueueQueueItem,
+  getPothiById,
   moveQueueItem,
+  recordHistoryEntry,
+  removeBookmark,
   removeQueueItem,
   resolveBaaniForPothi,
+  toggleBookmark,
   updateGranthAng,
 } from './utils/pothiState';
 
@@ -35,10 +43,16 @@ const STORAGE_KEYS = {
   sehaj: 'tatkhalsa.pothi.sehajProgress',
   settings: 'tatkhalsa.pothi.readerSettings',
   queue: 'tatkhalsa.pothi.queue',
+  bookmarks: 'tatkhalsa.pothi.bookmarks',
+  history: 'tatkhalsa.pothi.history',
+  lastTarget: 'tatkhalsa.pothi.lastReaderTarget',
 } as const;
 
 function normalizeRoute(pathname: string): AppRoute {
   const clean = pathname.replace(/\/+$/, '') || '/';
+  if (clean === '/pothi' || clean.startsWith('/pothi/')) {
+    return '/';
+  }
   switch (clean) {
     case '/':
       return '/';
@@ -78,6 +92,26 @@ function readStoredArray<T>(key: string, fallback: T[]): T[] {
   }
 }
 
+function readStoredTarget(fallback: ReaderTarget): ReaderTarget {
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEYS.lastTarget);
+    if (!raw) return fallback;
+    const parsed = JSON.parse(raw) as ReaderTarget;
+    if (
+      parsed &&
+      (parsed.mode === 'ang' ||
+        parsed.mode === 'shabad' ||
+        parsed.mode === 'baani' ||
+        parsed.mode === 'ardaas')
+    ) {
+      return parsed;
+    }
+    return fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 export const App: React.FC = () => {
   const [route, setRoute] = useState<AppRoute>(() =>
     normalizeRoute(window.location.pathname),
@@ -98,13 +132,40 @@ export const App: React.FC = () => {
   const [queue, setQueue] = useState<QueueItem[]>(() =>
     readStoredArray<QueueItem>(STORAGE_KEYS.queue, []),
   );
-  const [readerTarget, setReaderTarget] = useState<ReaderTarget>(() => ({
-    mode: 'ang',
-    granth: 'sggs',
-    ang: readStoredJson(STORAGE_KEYS.sehaj, DEFAULT_SEHAJ_PROGRESS).sggs,
-  }));
+  const [bookmarks, setBookmarks] = useState<BookmarkItem[]>(() =>
+    readStoredArray<BookmarkItem>(STORAGE_KEYS.bookmarks, []),
+  );
+  const [history, setHistory] = useState<HistoryEntry[]>(() =>
+    readStoredArray<HistoryEntry>(STORAGE_KEYS.history, []),
+  );
+  const [readerTarget, setReaderTarget] = useState<ReaderTarget>(() =>
+    readStoredTarget({
+      mode: 'ang',
+      granth: 'sggs',
+      ang: readStoredJson(STORAGE_KEYS.sehaj, DEFAULT_SEHAJ_PROGRESS).sggs,
+    }),
+  );
   const [queueOpen, setQueueOpen] = useState(false);
   const [presenterStartIndex, setPresenterStartIndex] = useState(0);
+
+  // Consolidate legacy /pothi paths to / cleanly in the address bar
+  useEffect(() => {
+    const clean = window.location.pathname.replace(/\/+$/, '') || '/';
+    if (clean === '/pothi' || clean.startsWith('/pothi/')) {
+      window.history.replaceState({}, '', '/');
+    }
+  }, []);
+
+  // Accidental Reload / Exit Guard during active Paath
+  useEffect(() => {
+    if (route !== '/reader' || !settings.paathExitGuard) return;
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [route, settings.paathExitGuard]);
 
   // Sync HTML root theme classes (Light / Warm Parchment / Dark Night)
   useEffect(() => {
@@ -156,6 +217,39 @@ export const App: React.FC = () => {
     }
   }, [queue]);
 
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(
+        STORAGE_KEYS.bookmarks,
+        JSON.stringify(bookmarks),
+      );
+    } catch {
+      // ignore
+    }
+  }, [bookmarks]);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(
+        STORAGE_KEYS.history,
+        JSON.stringify(history),
+      );
+    } catch {
+      // ignore
+    }
+  }, [history]);
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem(
+        STORAGE_KEYS.lastTarget,
+        JSON.stringify(readerTarget),
+      );
+    } catch {
+      // ignore
+    }
+  }, [readerTarget]);
+
   // Browser back/forward navigation
   useEffect(() => {
     const onPopState = () => {
@@ -185,10 +279,34 @@ export const App: React.FC = () => {
     setSehajProgress((prev) => updateGranthAng(prev, granth, ang));
   }, []);
 
+  const handleToggleBookmark = useCallback(
+    (candidate: Omit<BookmarkItem, 'savedAt'>) => {
+      setBookmarks((prev) => toggleBookmark(prev, candidate));
+    },
+    [],
+  );
+
+  const handleRemoveBookmark = useCallback((id: string) => {
+    setBookmarks((prev) => removeBookmark(prev, id));
+  }, []);
+
   const handleOpenAng = useCallback(
     (granth: GranthId, ang: number) => {
-      setSehajProgress((prev) => updateGranthAng(prev, granth, ang));
-      setReaderTarget({ mode: 'ang', granth, ang });
+      const meta = GRANTH_CATALOG[granth];
+      const safeAng = Math.max(1, Math.min(meta.maxAng, Math.floor(ang)));
+      setSehajProgress((prev) => updateGranthAng(prev, granth, safeAng));
+      setReaderTarget({ mode: 'ang', granth, ang: safeAng });
+      setHistory((prev) =>
+        recordHistoryEntry(prev, {
+          id: `ang:${granth}:${safeAng}`,
+          kind: 'ang',
+          titleGurmukhi: meta.gurmukhiName,
+          titleEnglish: `${meta.shortName} — ${meta.unitLabel} ${safeAng}`,
+          subtitle: `${meta.shortName} · ${meta.unitLabel} ${safeAng} of ${meta.maxAng}`,
+          granth,
+          ang: safeAng,
+        }),
+      );
       navigate('/reader');
     },
     [navigate],
@@ -196,6 +314,22 @@ export const App: React.FC = () => {
 
   const handleOpenShabad = useCallback(
     (shabadId: string, highlightTukId?: string) => {
+      const found = FULL_SEARCH_CORPUS.find((s) => s.id === shabadId);
+      if (found) {
+        const meta = GRANTH_CATALOG[found.granth];
+        setHistory((prev) =>
+          recordHistoryEntry(prev, {
+            id: `shabad:${found.id}`,
+            kind: 'shabad',
+            titleGurmukhi: found.titleGurmukhi,
+            titleEnglish: found.titleEnglish,
+            subtitle: `${meta.shortName} · ${meta.unitLabel} ${found.ang} · ${found.raag}`,
+            granth: found.granth,
+            ang: found.ang,
+            shabadId: found.id,
+          }),
+        );
+      }
       setReaderTarget({ mode: 'shabad', shabadId, highlightTukId });
       navigate('/reader');
     },
@@ -206,6 +340,21 @@ export const App: React.FC = () => {
     (baaniId: string, pothiId?: string) => {
       const resolvedPothiId = pothiId ?? activePothiId;
       setActivePothiId(resolvedPothiId);
+      const resolved = resolveBaaniForPothi(resolvedPothiId, baaniId);
+      if (resolved) {
+        setHistory((prev) =>
+          recordHistoryEntry(prev, {
+            id: `baani:${resolved.pothi.id}:${resolved.baani.id}`,
+            kind: 'baani',
+            titleGurmukhi: resolved.baani.nameGurmukhi,
+            titleEnglish: resolved.baani.nameEnglish,
+            subtitle: `${resolved.pothi.name} · ${resolved.baani.timeOfDay}`,
+            granth: resolved.baani.granthSource,
+            baaniId: resolved.baani.id,
+            pothiId: resolved.pothi.id,
+          }),
+        );
+      }
       setReaderTarget({ mode: 'baani', baaniId, pothiId: resolvedPothiId });
       navigate('/reader');
     },
@@ -215,10 +364,37 @@ export const App: React.FC = () => {
   const handleOpenArdaas = useCallback(
     (pothiId: string) => {
       setActivePothiId(pothiId);
+      const pothi = getPothiById(pothiId);
+      setHistory((prev) =>
+        recordHistoryEntry(prev, {
+          id: `ardaas:${pothi.id}`,
+          kind: 'ardaas',
+          titleGurmukhi: pothi.ardaas.titleGurmukhi,
+          titleEnglish: pothi.ardaas.titleEnglish,
+          subtitle: `${pothi.name} · Sampardai Ardaas`,
+          granth: 'dasam',
+          pothiId: pothi.id,
+        }),
+      );
       setReaderTarget({ mode: 'ardaas', pothiId });
       navigate('/reader');
     },
     [navigate],
+  );
+
+  const handleOpenSavedItem = useCallback(
+    (item: Pick<BookmarkItem, 'kind' | 'granth' | 'ang' | 'shabadId' | 'baaniId' | 'pothiId'>) => {
+      if (item.kind === 'baani' && item.baaniId) {
+        handleOpenBaani(item.baaniId, item.pothiId);
+      } else if (item.kind === 'ardaas' && item.pothiId) {
+        handleOpenArdaas(item.pothiId);
+      } else if (item.kind === 'shabad' && item.shabadId) {
+        handleOpenShabad(item.shabadId);
+      } else if (item.granth && item.ang) {
+        handleOpenAng(item.granth, item.ang);
+      }
+    },
+    [handleOpenAng, handleOpenArdaas, handleOpenBaani, handleOpenShabad],
   );
 
   const handleEnqueueShabad = useCallback((shabad: Shabad) => {
@@ -290,13 +466,16 @@ export const App: React.FC = () => {
 
   if (route === '/pothi-present') {
     return (
-      <PresenterMode
-        queue={queue}
-        initialQueueIndex={presenterStartIndex}
-        settings={settings}
-        onUpdateSettings={handleUpdateSettings}
-        onExit={() => navigate('/reader')}
-      />
+      <>
+        <PresenterMode
+          queue={queue}
+          initialQueueIndex={presenterStartIndex}
+          settings={settings}
+          onUpdateSettings={handleUpdateSettings}
+          onExit={() => navigate('/reader')}
+        />
+        <OfflineIndicator />
+      </>
     );
   }
 
@@ -324,6 +503,11 @@ export const App: React.FC = () => {
             onOpenArdaas={handleOpenArdaas}
             onEnqueueShabad={handleEnqueueShabad}
             queue={queue}
+            bookmarks={bookmarks}
+            history={history}
+            onRemoveBookmark={handleRemoveBookmark}
+            onOpenBookmark={handleOpenSavedItem}
+            onOpenHistory={handleOpenSavedItem}
           />
         )}
 
@@ -331,7 +515,11 @@ export const App: React.FC = () => {
           <GurbaniSearcher
             onOpenShabad={handleOpenShabad}
             onOpenAng={handleOpenAng}
+            onOpenBaani={handleOpenBaani}
+            onOpenArdaas={handleOpenArdaas}
             onEnqueueShabad={handleEnqueueShabad}
+            onToggleBookmark={handleToggleBookmark}
+            bookmarks={bookmarks}
             queue={queue}
           />
         )}
@@ -358,6 +546,9 @@ export const App: React.FC = () => {
             queue={queue}
             onEnqueueCurrent={handleEnqueueItem}
             onLaunchPresenterWithItem={handleLaunchPresenterWithItem}
+            bookmarks={bookmarks}
+            onToggleBookmark={handleToggleBookmark}
+            onOpenBookmark={handleOpenSavedItem}
           />
         )}
       </main>
@@ -377,6 +568,8 @@ export const App: React.FC = () => {
           navigate('/pothi-present');
         }}
       />
+
+      <OfflineIndicator />
     </div>
   );
 };

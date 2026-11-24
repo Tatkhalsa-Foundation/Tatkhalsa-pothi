@@ -1,16 +1,12 @@
 import React from 'react';
-import type { GurmukhiFont, Tuk } from '../types/pothi';
-import { toLarivaar, tokenizeWithVishraam } from '../utils/gurbaniSearch';
+import type { Tuk } from '../types/pothi';
+import { toLarivaar, transliterateGurmukhi } from '../utils/gurbaniSearch';
 
 interface TukLineProps {
   tuk: Tuk;
   larivaar: boolean;
-  vishraam: boolean;
   showTransliteration: boolean;
-  showEnglish: boolean;
-  showTeeka: boolean;
   fontSize: number;
-  gurmukhiFont: GurmukhiFont;
   highlighted?: boolean;
   centered?: boolean;
   onSelect?: () => void;
@@ -19,22 +15,13 @@ interface TukLineProps {
 export const TukLine: React.FC<TukLineProps> = ({
   tuk,
   larivaar,
-  vishraam,
   showTransliteration,
-  showEnglish,
-  showTeeka,
   fontSize,
-  gurmukhiFont,
   highlighted = false,
   centered = false,
   onSelect,
 }) => {
-  const fontClass =
-    gurmukhiFont === 'GurbaniAkharThick'
-      ? 'font-gurmukhi-akhar'
-      : 'font-gurmukhi-noto';
-
-  const tokens = tokenizeWithVishraam(tuk.gurmukhi, tuk.vishraam);
+  const phoneticRoman = showTransliteration ? transliterateGurmukhi(tuk.gurmukhi) : '';
 
   return (
     <article
@@ -49,93 +36,43 @@ export const TukLine: React.FC<TukLineProps> = ({
     >
       <p
         lang="pa"
-        className={`${fontClass} ${larivaar ? 'larivaar-mode' : ''} leading-[1.85] text-[var(--ink-primary)] break-words`}
+        className={`font-gurmukhi-noto ${larivaar ? 'larivaar-mode' : ''} leading-[1.85] text-[var(--ink-primary)] break-words`}
         style={{ fontSize: `${fontSize}px` }}
       >
-        {larivaar ? (
-          vishraam && tuk.vishraam && tuk.vishraam.length > 0 ? (
-            tokens.map((tok, idx) => (
-              <span
-                key={`${tuk.id}-lv-${idx}`}
-                className={
-                  tok.vishraamType === 'primary'
-                    ? 'vishraam-primary'
-                    : tok.vishraamType === 'secondary'
-                      ? 'vishraam-secondary'
-                      : undefined
-                }
-                title={
-                  tok.vishraamType === 'primary'
-                    ? 'Primary Vishraam (Heavy Pause)'
-                    : tok.vishraamType === 'secondary'
-                      ? 'Secondary Vishraam (Light Pause)'
-                      : undefined
-                }
-              >
-                {tok.word}
-              </span>
-            ))
-          ) : (
-            toLarivaar(tuk.gurmukhi)
-          )
-        ) : (
-          tokens.map((tok, idx) => (
-            <React.Fragment key={`${tuk.id}-pc-${idx}`}>
-              <span
-                className={
-                  vishraam && tok.vishraamType === 'primary'
-                    ? 'vishraam-primary'
-                    : vishraam && tok.vishraamType === 'secondary'
-                      ? 'vishraam-secondary'
-                      : undefined
-                }
-                title={
-                  vishraam && tok.vishraamType === 'primary'
-                    ? 'Primary Vishraam (Heavy Pause)'
-                    : vishraam && tok.vishraamType === 'secondary'
-                      ? 'Secondary Vishraam (Light Pause)'
-                      : undefined
-                }
-              >
-                {tok.word}
-              </span>
-              {idx < tokens.length - 1 ? ' ' : ''}
-            </React.Fragment>
-          ))
-        )}
+        {larivaar ? toLarivaar(tuk.gurmukhi) : tuk.gurmukhi}
       </p>
 
-      {showTransliteration && tuk.transliteration && (
+      {showTransliteration && phoneticRoman && (
         <p
           className={`mt-2.5 text-[15px] leading-relaxed text-[var(--accent-gold)] ${
             centered ? 'mx-auto max-w-3xl' : 'max-w-3xl'
           }`}
         >
-          {tuk.transliteration}
+          {phoneticRoman}
         </p>
       )}
 
-      {showEnglish && tuk.english && (
+      {tuk.inHouseTranslation && (
         <p
           className={`mt-1.5 text-[15px] leading-relaxed text-[var(--ink-secondary)] ${
             centered ? 'mx-auto max-w-3xl' : 'max-w-3xl'
           }`}
         >
-          {tuk.english}
+          {tuk.inHouseTranslation}
         </p>
       )}
 
-      {showTeeka && tuk.teeka && (
+      {tuk.faridkotTeeka && (
         <div
           className={`mt-3 pt-2.5 border-t pothi-divider text-sm leading-relaxed text-[var(--ink-muted)] ${
             centered ? 'mx-auto max-w-3xl' : 'max-w-3xl'
           }`}
         >
           <span className="font-semibold text-[var(--ink-secondary)] mr-2">
-            Teeka / Arth:
+            Faridkot Vala Teeka (Public Domain):
           </span>
           <span lang="pa" className="font-gurmukhi-noto">
-            {tuk.teeka}
+            {tuk.faridkotTeeka}
           </span>
         </div>
       )}

@@ -3,7 +3,9 @@ import { NITNEM_AND_COLLECTIONS } from '../data/nitnemBaanis';
 import { SAMPARDAI_POTHIS } from '../data/sampardaiPothis';
 import type {
   BaaniCollection,
+  BookmarkItem,
   GranthId,
+  HistoryEntry,
   QueueItem,
   ReaderSettings,
   SampardaiPothi,
@@ -21,13 +23,10 @@ export const DEFAULT_SEHAJ_PROGRESS: SehajPaathProgress = {
 
 export const DEFAULT_READER_SETTINGS: ReaderSettings = {
   larivaar: false,
-  vishraam: true,
   showTransliteration: true,
-  showEnglish: true,
-  showTeeka: false,
   fontSize: 28,
-  gurmukhiFont: 'Noto Sans Gurmukhi',
   theme: 'parchment',
+  paathExitGuard: true,
 };
 
 export function getPothiById(pothiId: string): SampardaiPothi {
@@ -140,4 +139,29 @@ export function moveQueueItem(
   const [moved] = next.splice(index, 1);
   next.splice(targetIndex, 0, moved);
   return next;
+}
+
+export function toggleBookmark(
+  bookmarks: BookmarkItem[],
+  candidate: Omit<BookmarkItem, 'savedAt'>,
+  now: number = Date.now(),
+): BookmarkItem[] {
+  if (bookmarks.some((b) => b.id === candidate.id)) {
+    return bookmarks.filter((b) => b.id !== candidate.id);
+  }
+  return [{ ...candidate, savedAt: now }, ...bookmarks];
+}
+
+export function removeBookmark(bookmarks: BookmarkItem[], id: string): BookmarkItem[] {
+  return bookmarks.filter((b) => b.id !== id);
+}
+
+export function recordHistoryEntry(
+  history: HistoryEntry[],
+  candidate: Omit<HistoryEntry, 'visitedAt'>,
+  now: number = Date.now(),
+  maxEntries = 25,
+): HistoryEntry[] {
+  const filtered = history.filter((item) => item.id !== candidate.id);
+  return [{ ...candidate, visitedAt: now }, ...filtered].slice(0, maxEntries);
 }

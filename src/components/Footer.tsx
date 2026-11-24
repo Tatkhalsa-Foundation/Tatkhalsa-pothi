@@ -11,14 +11,17 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
       <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-8 sm:px-6 lg:px-8 md:flex-row md:items-center md:justify-between">
         <div className="space-y-1">
           <p className="font-display text-base font-semibold text-[var(--ink-primary)]">
-            Tatkhalsa Web Pothi
+            Tatkhalsa Pothi Sahib
           </p>
           <p className="text-xs text-[var(--ink-muted)]">
-            100% Free Seva by Tatkhalsa Foundation · pothi.tatkhalsa.in · Strict Sampardai Maryada Isolation
+            100% Free Seva by Tatkhalsa Foundation · pothi.tatkhalsa.in · Public-Domain Unicode Gurmukhi
           </p>
         </div>
 
-        <nav aria-label="Footer navigation" className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-[var(--ink-secondary)]">
+        <nav
+          aria-label="Footer navigation"
+          className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-[var(--ink-secondary)]"
+        >
           <button
             type="button"
             onClick={() => onNavigate('/')}
@@ -54,6 +57,23 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           >
             Presenter Mode
           </button>
+          <span aria-hidden="true" className="text-[var(--border-subtle)]">|</span>
+          <a
+            href="https://tatkhalsa.in"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-[var(--accent-gold)] transition-colors"
+          >
+            tatkhalsa.in
+          </a>
+          <a
+            href="https://calendar.tatkhalsa.in"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-[var(--accent-gold)] transition-colors"
+          >
+            calendar.tatkhalsa.in
+          </a>
         </nav>
       </div>
     </footer>

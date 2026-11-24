@@ -11,6 +11,7 @@ import {
 import { GRANTH_CATALOG } from '../data/gurbaniCorpus';
 import { SAMPARDAI_POTHIS } from '../data/sampardaiPothis';
 import type { BaaniCollection, QueueItem, SampardaiPothi } from '../types/pothi';
+import { transliterateGurmukhi } from '../utils/gurbaniSearch';
 import {
   getAdditionalCollections,
   getOrderedNitnemForPothi,
@@ -44,6 +45,8 @@ export const SundarGutka: React.FC<SundarGutkaProps> = ({
   const isBaaniQueued = (baaniId: string) =>
     queue.some((q) => q.id === `baani:${activePothiId}:${baaniId}`);
 
+  const ardaasPreviewGurmukhi = activePothi.ardaas.tuks[3]?.gurmukhi ?? '';
+
   return (
     <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8 py-8 md:py-10 space-y-10">
       {/* Header + Prominent Pothi Version Switcher */}
@@ -57,7 +60,7 @@ export const SundarGutka: React.FC<SundarGutkaProps> = ({
               Sundar Gutka &amp; Nitnem
             </h1>
             <p className="text-sm text-[var(--ink-secondary)]">
-              Switch between 15 isolated Sampardai Pothis below. Baani sequence, Manglacharan, Chaupai/Rehras Maryada notes, and Sampardai Ardaas remain strictly isolated to your selected tradition.
+              Switch between 15 isolated Sampardai Pothis below. Baani sequence (beginning with Japneesan), Manglacharan, Chaupai/Rehras Maryada notes, and Sampardai Ardaas remain strictly isolated to your selected tradition.
             </p>
           </div>
 
@@ -66,7 +69,7 @@ export const SundarGutka: React.FC<SundarGutkaProps> = ({
               htmlFor="pothi-version-switcher"
               className="block text-xs font-semibold text-[var(--ink-primary)]"
             >
-              Pothi Version Switcher (15 Maryadas)
+              Pothi Version Switcher (15 Traditions)
             </label>
             <select
               id="pothi-version-switcher"
@@ -228,7 +231,7 @@ export const SundarGutka: React.FC<SundarGutkaProps> = ({
                   <button
                     type="button"
                     onClick={() => onOpenBaani(baani.id, activePothiId)}
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--accent-navy)] px-4 py-2 text-xs font-medium text-white dark:text-[#0c1220] hover:bg-[var(--accent-navy-hover)] cursor-pointer min-h-[40px]"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--accent-navy)] px-4 py-2 text-xs font-medium text-white dark:text-[#0B1220] hover:bg-[var(--accent-navy-hover)] cursor-pointer min-h-[40px]"
                   >
                     <BookOpen className="h-3.5 w-3.5" aria-hidden="true" />
                     Read Baani
@@ -263,7 +266,7 @@ export const SundarGutka: React.FC<SundarGutkaProps> = ({
           <button
             type="button"
             onClick={() => onOpenArdaas(activePothiId)}
-            className="inline-flex items-center gap-2 rounded-lg bg-[var(--accent-navy)] px-4 py-2.5 text-xs font-medium text-white dark:text-[#0c1220] hover:bg-[var(--accent-navy-hover)] transition-colors cursor-pointer min-h-[42px] whitespace-nowrap shrink-0"
+            className="inline-flex items-center gap-2 rounded-lg bg-[var(--accent-navy)] px-4 py-2.5 text-xs font-medium text-white dark:text-[#0B1220] hover:bg-[var(--accent-navy-hover)] transition-colors cursor-pointer min-h-[42px] whitespace-nowrap shrink-0"
           >
             Read Full Sampardai Ardaas
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
@@ -272,11 +275,13 @@ export const SundarGutka: React.FC<SundarGutkaProps> = ({
 
         <div className="rounded-xl border pothi-divider bg-[var(--surface-subtle)] p-4 space-y-2">
           <p lang="pa" className="font-gurmukhi-noto text-lg leading-relaxed text-[var(--ink-primary)]">
-            {activePothi.ardaas.tuks[3]?.gurmukhi}
+            {ardaasPreviewGurmukhi}
           </p>
-          <p className="text-xs leading-relaxed text-[var(--ink-secondary)]">
-            {activePothi.ardaas.tuks[3]?.english}
-          </p>
+          {ardaasPreviewGurmukhi && (
+            <p className="text-xs leading-relaxed text-[var(--accent-gold)]">
+              {transliterateGurmukhi(ardaasPreviewGurmukhi)}
+            </p>
+          )}
         </div>
       </section>
 
@@ -341,7 +346,7 @@ export const SundarGutka: React.FC<SundarGutkaProps> = ({
                   <button
                     type="button"
                     onClick={() => onOpenBaani(col.id, activePothiId)}
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--accent-navy)] px-3.5 py-2 text-xs font-medium text-white dark:text-[#0c1220] hover:bg-[var(--accent-navy-hover)] cursor-pointer min-h-[38px]"
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--accent-navy)] px-3.5 py-2 text-xs font-medium text-white dark:text-[#0B1220] hover:bg-[var(--accent-navy-hover)] cursor-pointer min-h-[38px]"
                   >
                     Read Collection
                     <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />

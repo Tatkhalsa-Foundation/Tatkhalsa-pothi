@@ -8,6 +8,7 @@ import {
   Search,
 } from 'lucide-react';
 import type { AppRoute } from '../types/pothi';
+import { PWAInstallButton } from './PWAInstallButton';
 
 interface NavbarProps {
   currentRoute: AppRoute;
@@ -42,9 +43,9 @@ export const Navbar: React.FC<NavbarProps> = ({
 
   return (
     <>
-      {/* Desktop & Mobile Top Navigation Header — Strict 3-Zone Top Bar Contract */}
+      {/* Desktop & Mobile Top Navigation Header */}
       <header className="sticky top-0 z-40 border-b pothi-divider bg-[var(--surface-card)]/95 backdrop-blur-md">
-        <div className="mx-auto flex h-12 md:h-16 max-w-7xl items-center justify-between gap-8 px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto flex h-12 md:h-16 max-w-7xl items-center justify-between gap-4 lg:gap-8 px-4 sm:px-6 lg:px-8">
           {/* Zone 1: Single-element Wordmark */}
           <a
             href="/"
@@ -54,13 +55,13 @@ export const Navbar: React.FC<NavbarProps> = ({
             }}
             className="font-display text-lg md:text-xl font-semibold tracking-tight text-[var(--ink-primary)] whitespace-nowrap shrink-0 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--accent-gold)]"
           >
-            Tatkhalsa Web Pothi
+            Tatkhalsa Pothi Sahib
           </a>
 
-          {/* Zone 2: 5 Single-Line Text Navigation Links (Desktop) */}
+          {/* Zone 2: Single-Line Text Navigation Links (Desktop) */}
           <nav
             aria-label="Primary navigation"
-            className="hidden md:flex items-center gap-7"
+            className="hidden md:flex items-center gap-5 lg:gap-7"
           >
             {NAV_ITEMS.map((item) => {
               const active = isRouteActive(item.route);
@@ -91,13 +92,14 @@ export const Navbar: React.FC<NavbarProps> = ({
             })}
           </nav>
 
-          {/* Zone 3: Single Primary Action (Multi-View Queue) */}
-          <div className="flex items-center shrink-0">
+          {/* Zone 3: PWA Install + Multi-View Queue */}
+          <div className="flex items-center gap-2 shrink-0">
+            <PWAInstallButton />
             <button
               type="button"
               onClick={onOpenQueue}
               aria-label={`Open Shabad Queue (${queueCount} queued)`}
-              className="inline-flex items-center gap-2 rounded-lg bg-[var(--accent-navy)] px-3.5 py-2 text-xs sm:text-sm font-medium text-white dark:text-[#0c1220] hover:bg-[var(--accent-navy-hover)] transition-colors whitespace-nowrap shrink-0 min-h-[38px] md:min-h-[40px] cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent-gold)]"
+              className="inline-flex items-center gap-2 rounded-lg bg-[var(--accent-navy)] px-3.5 py-2 text-xs sm:text-sm font-medium text-white dark:text-[#0B1220] hover:bg-[var(--accent-navy-hover)] transition-colors whitespace-nowrap shrink-0 min-h-[38px] md:min-h-[40px] cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent-gold)]"
             >
               <Layers className="h-4 w-4 shrink-0" aria-hidden="true" />
               <span>
@@ -108,7 +110,7 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
       </header>
 
-      {/* Mobile Bottom Thumb-Zone Navigation Bar (compact 56px, combined <= 15% of mobile viewport) */}
+      {/* Mobile Bottom Thumb-Zone Navigation Bar */}
       <nav
         aria-label="Mobile navigation"
         className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t pothi-divider bg-[var(--surface-card)]/95 backdrop-blur-md"
@@ -129,8 +131,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                     : 'text-[var(--ink-muted)]'
                 }`}
               >
-                <Icon className="h-5 w-5" aria-hidden="true" />
-                <span className="mt-0.5 text-[11px] leading-none whitespace-nowrap">
+                <Icon className="h-4 w-4" aria-hidden="true" />
+                <span className="mt-0.5 text-[10px] leading-none whitespace-nowrap">
                   {item.mobileLabel}
                 </span>
               </button>

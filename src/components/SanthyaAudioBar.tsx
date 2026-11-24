@@ -1,34 +1,44 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  Link2,
+  FolderOpen,
+  Headphones,
   Pause,
   Play,
   Repeat,
+  SkipForward,
   Volume2,
   VolumeX,
+  X,
 } from 'lucide-react';
 
 interface SanthyaAudioBarProps {
-  trackLabel: string;
-  initialAudioUrl?: string;
+  contextTitle: string;
+  tukCount?: number;
+  activeTukIndex?: number | null;
+  onActiveTukChange?: (index: number | null) => void;
+  onAutoAdvanceNext?: () => void;
+  canAutoAdvanceNext?: boolean;
 }
 
 const SPEED_OPTIONS = [0.75, 1, 1.25];
 
 export const SanthyaAudioBar: React.FC<SanthyaAudioBarProps> = ({
-  trackLabel,
-  initialAudioUrl = '',
+  contextTitle,
+  tukCount = 0,
+  activeTukIndex = null,
+  onActiveTukChange,
+  onAutoAdvanceNext,
+  canAutoAdvanceNext = false,
 }) => {
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const audioCtxRef = useRef<AudioContext | null>(null);
-  const oscNodesRef = useRef<OscillatorNode[]>([]);
-  const gainNodeRef = useRef<GainNode | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const activeTukRef = useRef<number>(activeTukIndex ?? 0);
 
-  const [audioUrl, setAudioUrl] = useState(initialAudioUrl);
-  const [urlInput, setUrlInput] = useState(initialAudioUrl);
-  const [showUrlEditor, setShowUrlEditor] = useState(false);
+  const [localObjectUrl, setLocalObjectUrl] = useState<string | null>(null);
+  const [localFileName, setLocalFileName] = useState<string>('');
   const [isPlaying, setIsPlaying] = useState(false);
   const [isLooping, setIsLooping] = useState(false);
+  const [autoAdvance, setAutoAdvance] = useState(true);
   const [isMuted, setIsMuted] = useState(false);
   const [playbackRate, setPlaybackRate] = useState(1);
   const [currentTime, setCurrentTime] = useState(0);
@@ -36,103 +46,72 @@ export const SanthyaAudioBar: React.FC<SanthyaAudioBarProps> = ({
   const [audioError, setAudioError] = useState<string | null>(null);
 
   useEffect(() => {
-    setAudioUrl(initialAudioUrl);
-    setUrlInput(initialAudioUrl);
-    setCurrentTime(0);
-    setDuration(0);
-    setAudioError(null);
-    stopDrone();
-    setIsPlaying(false);
-  }, [initialAudioUrl, trackLabel]);
+    activeTukRef.current = activeTukIndex ?? 0;
+  }, [activeTukIndex]);
 
   useEffect(() => {
     return () => {
-      stopDrone();
+      if (localObjectUrl) {
+        URL.revokeObjectURL(localObjectUrl);
+      }
     };
-  }, []);
+  }, [localObjectUrl]);
 
-  const stopDrone = () => {
-    for (const osc of oscNodesRef.current) {
-      try {
-        osc.stop();
-        osc.disconnect();
-      } catch {
-        // already stopped
-      }
+  const clearLocalTrack = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
     }
-    oscNodesRef.current = [];
-    if (gainNodeRef.current) {
-      try {
-        gainNodeRef.current.disconnect();
-      } catch {
-        // ignore
-      }
-      gainNodeRef.current = null;
+    if (localObjectUrl) {
+      URL.revokeObjectURL(localObjectUrl);
+    }
+    setLocalObjectUrl(null);
+    setLocalFileName('');
+    setIsPlaying(false);
+    setCurrentTime(0);
+    setDuration(0);
+    setAudioError(null);
+    onActiveTukChange?.(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
     }
   };
 
-  const startGentleTanpuraDrone = () => {
-    try {
-      const Ctx =
-        window.AudioContext ||
-        (window as unknown as { webkitAudioContext: typeof AudioContext })
-          .webkitAudioContext;
-      if (!audioCtxRef.current) {
-        audioCtxRef.current = new Ctx();
-      }
-      const ctx = audioCtxRef.current;
-      if (ctx.state === 'suspended') {
-        void ctx.resume();
-      }
-      stopDrone();
-
-      const masterGain = ctx.createGain();
-      masterGain.gain.value = isMuted ? 0 : 0.045;
-      masterGain.connect(ctx.destination);
-      gainNodeRef.current = masterGain;
-
-      // Soft Sa-Pa-Sa tanpura harmonic pitch (C#3 / G#3 / C#4) for meditative Santhya accompaniment
-      const freqs = [138.59, 207.65, 277.18];
-      oscNodesRef.current = freqs.map((f, idx) => {
-        const osc = ctx.createOscillator();
-        osc.type = idx === 1 ? 'triangle' : 'sine';
-        osc.frequency.value = f;
-        osc.connect(masterGain);
-        osc.start();
-        return osc;
-      });
-    } catch {
-      setAudioError('Browser audio playback is restricted until interacted.');
+  const handleFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (localObjectUrl) {
+      URL.revokeObjectURL(localObjectUrl);
     }
+    const nextUrl = URL.createObjectURL(file);
+    setLocalObjectUrl(nextUrl);
+    setLocalFileName(file.name);
+    setCurrentTime(0);
+    setDuration(0);
+    setIsPlaying(false);
+    setAudioError(null);
+    onActiveTukChange?.(null);
   };
 
   const togglePlay = async () => {
     setAudioError(null);
-    if (audioUrl.trim()) {
-      const el = audioRef.current;
-      if (!el) return;
-      if (isPlaying) {
-        el.pause();
-        setIsPlaying(false);
-      } else {
-        try {
-          el.playbackRate = playbackRate;
-          el.loop = isLooping;
-          el.muted = isMuted;
-          await el.play();
-          setIsPlaying(true);
-        } catch {
-          setAudioError('Unable to load audio stream URL. Check CORS or try another MP3/OGG URL.');
-          setIsPlaying(false);
-        }
-      }
+    const el = audioRef.current;
+    if (!localObjectUrl || !el) return;
+    if (isPlaying) {
+      el.pause();
+      setIsPlaying(false);
     } else {
-      if (isPlaying) {
-        stopDrone();
-        setIsPlaying(false);
-      } else {
-        startGentleTanpuraDrone();
+      try {
+        el.playbackRate = playbackRate;
+        el.loop = isLooping;
+        el.muted = isMuted;
+        await el.play();
         setIsPlaying(true);
+        if (tukCount > 0 && activeTukIndex === null) {
+          onActiveTukChange?.(0);
+        }
+      } catch {
+        setAudioError('Unable to play the selected local audio file.');
+        setIsPlaying(false);
       }
     }
   };
@@ -150,18 +129,6 @@ export const SanthyaAudioBar: React.FC<SanthyaAudioBarProps> = ({
     if (audioRef.current) {
       audioRef.current.muted = next;
     }
-    if (gainNodeRef.current) {
-      gainNodeRef.current.gain.value = next ? 0 : 0.045;
-    }
-  };
-
-  const handleApplyUrl = (e: React.FormEvent) => {
-    e.preventDefault();
-    stopDrone();
-    setIsPlaying(false);
-    setAudioError(null);
-    setAudioUrl(urlInput.trim());
-    setShowUrlEditor(false);
   };
 
   const formatTime = (sec: number) => {
@@ -173,19 +140,46 @@ export const SanthyaAudioBar: React.FC<SanthyaAudioBarProps> = ({
 
   return (
     <section
-      aria-label="Santhya Audio Player"
+      aria-label="Tatkhalsa Santhya Audio Player"
       className="rounded-xl border pothi-divider pothi-surface p-3.5 sm:px-5"
     >
-      {audioUrl && (
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="audio/*"
+        onChange={handleFileSelected}
+        className="sr-only"
+        aria-label="Load local Tatkhalsa Santhya audio file"
+      />
+
+      {localObjectUrl && (
         <audio
           ref={audioRef}
-          src={audioUrl}
+          src={localObjectUrl}
           loop={isLooping}
-          onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime)}
+          onTimeUpdate={(e) => {
+            const cur = e.currentTarget.currentTime;
+            const dur = e.currentTarget.duration;
+            setCurrentTime(cur);
+            if (tukCount > 0 && Number.isFinite(dur) && dur > 0) {
+              const idx = Math.min(tukCount - 1, Math.floor((cur / dur) * tukCount));
+              if (idx !== activeTukRef.current) {
+                activeTukRef.current = idx;
+                onActiveTukChange?.(idx);
+              }
+            }
+          }}
           onLoadedMetadata={(e) => setDuration(e.currentTarget.duration)}
-          onEnded={() => setIsPlaying(false)}
+          onEnded={() => {
+            setIsPlaying(false);
+            if (autoAdvance && !isLooping && canAutoAdvanceNext && onAutoAdvanceNext) {
+              onAutoAdvanceNext();
+            } else {
+              onActiveTukChange?.(null);
+            }
+          }}
           onError={() => {
-            setAudioError('Audio source could not be loaded.');
+            setAudioError('Selected local audio file could not be decoded.');
             setIsPlaying(false);
           }}
         />
@@ -193,100 +187,137 @@ export const SanthyaAudioBar: React.FC<SanthyaAudioBarProps> = ({
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0 flex-1">
-          <button
-            type="button"
-            onClick={togglePlay}
-            aria-label={isPlaying ? 'Pause Santhya audio' : 'Play Santhya audio'}
-            className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--accent-navy)] text-white dark:text-[#0c1220] hover:bg-[var(--accent-navy-hover)] transition-colors cursor-pointer"
-          >
-            {isPlaying ? (
-              <Pause className="h-4 w-4" aria-hidden="true" />
-            ) : (
-              <Play className="h-4 w-4 ml-0.5" aria-hidden="true" />
-            )}
-          </button>
+          {localObjectUrl ? (
+            <button
+              type="button"
+              onClick={togglePlay}
+              aria-label={isPlaying ? 'Pause local Santhya audio' : 'Play local Santhya audio'}
+              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--accent-navy)] text-white dark:text-[#0B1220] hover:bg-[var(--accent-navy-hover)] transition-colors cursor-pointer"
+            >
+              {isPlaying ? (
+                <Pause className="h-4 w-4" aria-hidden="true" />
+              ) : (
+                <Play className="h-4 w-4 ml-0.5" aria-hidden="true" />
+              )}
+            </button>
+          ) : (
+            <div
+              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[var(--surface-subtle)] border pothi-divider text-[var(--accent-gold)]"
+              aria-hidden="true"
+            >
+              <Headphones className="h-4 w-4" />
+            </div>
+          )}
 
           <div className="min-w-0 flex-1">
             <p className="text-sm font-medium text-[var(--ink-primary)] truncate">
-              {trackLabel}
+              {localObjectUrl
+                ? localFileName
+                : 'In-house Santhya recordings coming soon'}
             </p>
             <p className="text-xs text-[var(--ink-muted)] truncate">
-              {audioUrl
-                ? `Custom Audio Track · ${formatTime(currentTime)} / ${formatTime(duration)}`
-                : isPlaying
-                  ? 'Tanpura Santhya Pitch Active · Add any MP3/OGG URL for guided audio'
-                  : 'Ready for Santhya track URL or gentle Tanpura pitch'}
+              {localObjectUrl
+                ? `Local Audio · ${formatTime(currentTime)} / ${formatTime(duration)}${activeTukIndex !== null && tukCount > 0 ? ` · Tuk ${activeTukIndex + 1} of ${tukCount}` : ''}`
+                : `Reserved for original Tatkhalsa Foundation audio (${contextTitle}). Load a local file to practice.`}
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
-          <div
-            className="flex items-center rounded-lg border pothi-divider p-0.5 bg-[var(--surface-subtle)]"
-            role="group"
-            aria-label="Santhya playback speed"
-          >
-            {SPEED_OPTIONS.map((rate) => (
+        <div className="flex flex-wrap items-center gap-2 shrink-0">
+          {localObjectUrl && (
+            <>
+              <div
+                className="flex items-center rounded-lg border pothi-divider p-0.5 bg-[var(--surface-subtle)]"
+                role="group"
+                aria-label="Santhya playback speed"
+              >
+                {SPEED_OPTIONS.map((rate) => (
+                  <button
+                    key={rate}
+                    type="button"
+                    aria-pressed={playbackRate === rate}
+                    onClick={() => handleRateChange(rate)}
+                    className={`px-2 py-1 text-xs font-mono-nums rounded-md transition-colors cursor-pointer ${
+                      playbackRate === rate
+                        ? 'bg-[var(--surface-card)] text-[var(--ink-primary)] font-semibold shadow-xs'
+                        : 'text-[var(--ink-muted)] hover:text-[var(--ink-primary)]'
+                    }`}
+                  >
+                    {rate}x
+                  </button>
+                ))}
+              </div>
+
               <button
-                key={rate}
                 type="button"
-                onClick={() => handleRateChange(rate)}
-                className={`px-2 py-1 text-xs font-mono-nums rounded-md transition-colors cursor-pointer ${
-                  playbackRate === rate
-                    ? 'bg-[var(--surface-card)] text-[var(--ink-primary)] font-semibold shadow-xs'
-                    : 'text-[var(--ink-muted)] hover:text-[var(--ink-primary)]'
+                onClick={() => setAutoAdvance((v) => !v)}
+                aria-pressed={autoAdvance}
+                aria-label="Toggle auto-advance to next Ang or Baani"
+                title="Auto-advance when track completes"
+                className={`inline-flex items-center gap-1 rounded-lg border px-2.5 h-9 text-xs font-medium transition-colors cursor-pointer whitespace-nowrap ${
+                  autoAdvance
+                    ? 'border-[var(--accent-gold)] bg-[var(--accent-gold-soft)] text-[var(--ink-primary)]'
+                    : 'pothi-divider text-[var(--ink-muted)] hover:text-[var(--ink-primary)]'
                 }`}
               >
-                {rate}x
+                <SkipForward className="h-3.5 w-3.5" aria-hidden="true" />
+                <span className="hidden sm:inline">Auto-Next</span>
               </button>
-            ))}
-          </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const next = !isLooping;
+                  setIsLooping(next);
+                  if (audioRef.current) audioRef.current.loop = next;
+                }}
+                aria-pressed={isLooping}
+                aria-label="Toggle loop track"
+                className={`inline-flex h-9 w-9 items-center justify-center rounded-lg border transition-colors cursor-pointer ${
+                  isLooping
+                    ? 'border-[var(--accent-gold)] bg-[var(--accent-gold-soft)] text-[var(--accent-gold)]'
+                    : 'pothi-divider text-[var(--ink-muted)] hover:text-[var(--ink-primary)]'
+                }`}
+              >
+                <Repeat className="h-4 w-4" aria-hidden="true" />
+              </button>
+
+              <button
+                type="button"
+                onClick={toggleMute}
+                aria-label={isMuted ? 'Unmute audio' : 'Mute audio'}
+                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border pothi-divider text-[var(--ink-muted)] hover:text-[var(--ink-primary)] transition-colors cursor-pointer"
+              >
+                {isMuted ? (
+                  <VolumeX className="h-4 w-4" aria-hidden="true" />
+                ) : (
+                  <Volume2 className="h-4 w-4" aria-hidden="true" />
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={clearLocalTrack}
+                aria-label="Unload local audio file"
+                className="inline-flex h-9 w-9 items-center justify-center rounded-lg border pothi-divider text-[var(--ink-muted)] hover:text-[var(--ink-primary)] transition-colors cursor-pointer"
+              >
+                <X className="h-4 w-4" aria-hidden="true" />
+              </button>
+            </>
+          )}
 
           <button
             type="button"
-            onClick={() => {
-              const next = !isLooping;
-              setIsLooping(next);
-              if (audioRef.current) audioRef.current.loop = next;
-            }}
-            aria-pressed={isLooping}
-            aria-label="Toggle loop track"
-            className={`inline-flex h-9 w-9 items-center justify-center rounded-lg border transition-colors cursor-pointer ${
-              isLooping
-                ? 'border-[var(--accent-gold)] bg-[var(--accent-gold-soft)] text-[var(--accent-gold)]'
-                : 'pothi-divider text-[var(--ink-muted)] hover:text-[var(--ink-primary)]'
-            }`}
+            onClick={() => fileInputRef.current?.click()}
+            className="inline-flex items-center gap-1.5 rounded-lg border pothi-divider px-3 py-2 text-xs font-medium text-[var(--ink-secondary)] hover:bg-[var(--surface-subtle)] transition-colors whitespace-nowrap cursor-pointer min-h-[36px]"
           >
-            <Repeat className="h-4 w-4" aria-hidden="true" />
-          </button>
-
-          <button
-            type="button"
-            onClick={toggleMute}
-            aria-label={isMuted ? 'Unmute audio' : 'Mute audio'}
-            className="inline-flex h-9 w-9 items-center justify-center rounded-lg border pothi-divider text-[var(--ink-muted)] hover:text-[var(--ink-primary)] transition-colors cursor-pointer"
-          >
-            {isMuted ? (
-              <VolumeX className="h-4 w-4" aria-hidden="true" />
-            ) : (
-              <Volume2 className="h-4 w-4" aria-hidden="true" />
-            )}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setShowUrlEditor((v) => !v)}
-            aria-expanded={showUrlEditor}
-            aria-label="Set Santhya audio URL"
-            className="inline-flex items-center gap-1.5 rounded-lg border pothi-divider px-3 py-2 text-xs font-medium text-[var(--ink-secondary)] hover:bg-[var(--surface-subtle)] transition-colors whitespace-nowrap cursor-pointer"
-          >
-            <Link2 className="h-3.5 w-3.5" aria-hidden="true" />
-            Track URL
+            <FolderOpen className="h-3.5 w-3.5" aria-hidden="true" />
+            {localObjectUrl ? 'Change File' : 'Load Local Audio'}
           </button>
         </div>
       </div>
 
-      {audioUrl && duration > 0 && (
+      {localObjectUrl && duration > 0 && (
         <div className="mt-3 flex items-center gap-3">
           <input
             type="range"
@@ -303,41 +334,6 @@ export const SanthyaAudioBar: React.FC<SanthyaAudioBarProps> = ({
             className="w-full accent-[var(--accent-gold)] cursor-pointer"
           />
         </div>
-      )}
-
-      {showUrlEditor && (
-        <form onSubmit={handleApplyUrl} className="mt-3 flex flex-col sm:flex-row gap-2 pt-3 border-t pothi-divider">
-          <label htmlFor="santhya-audio-url" className="sr-only">
-            Santhya Audio Track URL
-          </label>
-          <input
-            id="santhya-audio-url"
-            type="url"
-            value={urlInput}
-            onChange={(e) => setUrlInput(e.target.value)}
-            placeholder="https://example.org/santhya/japji-sahib.mp3"
-            className="flex-1 rounded-lg border pothi-divider bg-[var(--surface-canvas)] px-3 py-2 text-xs text-[var(--ink-primary)] focus:outline-2 focus:outline-[var(--accent-gold)]"
-          />
-          <button
-            type="submit"
-            className="rounded-lg bg-[var(--accent-navy)] px-4 py-2 text-xs font-medium text-white dark:text-[#0c1220] hover:bg-[var(--accent-navy-hover)] cursor-pointer whitespace-nowrap"
-          >
-            Load Track
-          </button>
-          {audioUrl && (
-            <button
-              type="button"
-              onClick={() => {
-                setAudioUrl('');
-                setUrlInput('');
-                setAudioError(null);
-              }}
-              className="rounded-lg border pothi-divider px-3 py-2 text-xs text-[var(--ink-muted)] hover:text-[var(--ink-primary)] cursor-pointer whitespace-nowrap"
-            >
-              Reset
-            </button>
-          )}
-        </form>
       )}
 
       {audioError && (

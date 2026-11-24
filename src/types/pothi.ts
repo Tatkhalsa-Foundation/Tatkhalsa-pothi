@@ -2,7 +2,7 @@ export type GranthId = 'sggs' | 'dasam' | 'sarbloh' | 'bgv' | 'bnl';
 
 export type ThemeMode = 'light' | 'parchment' | 'dark';
 
-export type GurmukhiFont = 'Noto Sans Gurmukhi' | 'GurbaniAkharThick';
+export type GurmukhiFont = 'Noto Sans Gurmukhi';
 
 export type AppRoute =
   | '/'
@@ -15,17 +15,20 @@ export type AppRoute =
 export interface VishraamMark {
   /** Zero-based index of the word in the Pad Ched Tuk */
   wordIndex: number;
-  /** primary = heavy pause (Thahraav ';'), secondary = light pause (',') */
+  /** primary = heavy pause, secondary = light pause */
   type: 'primary' | 'secondary';
 }
 
 export interface Tuk {
   id: string;
+  /** Raw public-domain Unicode Gurmukhi scripture text */
   gurmukhi: string;
-  transliteration: string;
-  english: string;
-  teeka: string;
-  vishraam?: VishraamMark[];
+  /** Empty schema hook reserved strictly for Tatkhalsa Foundation's future original translations */
+  inHouseTranslation?: string;
+  /** Empty schema hook reserved strictly for verified public-domain late-19th-century Faridkot Vala Teeka */
+  faridkotTeeka?: string;
+  /** Empty schema hook reserved strictly for Tatkhalsa Foundation's future original Vishraam data */
+  inHouseVishraam?: VishraamMark[];
 }
 
 export interface Shabad {
@@ -38,8 +41,9 @@ export interface Shabad {
   author: string;
   section?: string;
   tuks: Tuk[];
-  audioUrl?: string;
-  audioLabel?: string;
+  /** Optional linkage when indexed from Sundar Gutka Baani or Sampardai Ardaas */
+  baaniId?: string;
+  pothiId?: string;
 }
 
 export interface BaaniCollection {
@@ -51,8 +55,6 @@ export interface BaaniCollection {
   timeOfDay: string;
   granthSource: GranthId;
   description: string;
-  audioLabel: string;
-  audioUrl?: string;
   tuks: Tuk[];
 }
 
@@ -98,13 +100,12 @@ export interface GranthMeta {
 
 export interface ReaderSettings {
   larivaar: boolean;
-  vishraam: boolean;
+  /** Algorithmic phonetic Romanization derived strictly from Unicode Gurmukhi */
   showTransliteration: boolean;
-  showEnglish: boolean;
-  showTeeka: boolean;
   fontSize: number;
-  gurmukhiFont: GurmukhiFont;
   theme: ThemeMode;
+  /** Warns before accidental browser reload/exit during active Paath */
+  paathExitGuard: boolean;
 }
 
 export type SehajPaathProgress = Record<GranthId, number>;
@@ -121,13 +122,40 @@ export interface QueueItem {
   tuks: Tuk[];
 }
 
+export interface BookmarkItem {
+  id: string;
+  kind: 'shabad' | 'ang' | 'baani' | 'ardaas';
+  titleGurmukhi: string;
+  titleEnglish: string;
+  subtitle: string;
+  granth: GranthId;
+  ang?: number;
+  shabadId?: string;
+  baaniId?: string;
+  pothiId?: string;
+  savedAt: number;
+}
+
+export interface HistoryEntry {
+  id: string;
+  kind: 'shabad' | 'ang' | 'baani' | 'ardaas';
+  titleGurmukhi: string;
+  titleEnglish: string;
+  subtitle: string;
+  granth: GranthId;
+  ang?: number;
+  shabadId?: string;
+  baaniId?: string;
+  pothiId?: string;
+  visitedAt: number;
+}
+
 export type SearchMatchType =
   | 'direct-ang'
   | 'first-letter-gurmukhi'
   | 'first-letter-roman'
   | 'exact-gurmukhi'
-  | 'phonetic'
-  | 'english';
+  | 'phonetic';
 
 export interface SearchResult {
   shabadId: string;
@@ -141,6 +169,8 @@ export interface SearchResult {
   matchedTuk: Tuk;
   matchType: SearchMatchType;
   score: number;
+  baaniId?: string;
+  pothiId?: string;
 }
 
 export type ReaderTarget =

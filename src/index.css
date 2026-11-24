@@ -9,63 +9,45 @@
     --surface-elevated: #ffffff;
     --border-hairline: #e5e0d5;
     --border-strong: #cfc6b4;
-    --ink-primary: #141c2c;
-    --ink-secondary: #434d60;
-    --ink-muted: #687285;
+    --ink-primary: #0f172a;
+    --ink-secondary: #3f4a5e;
+    --ink-muted: #647084;
     --accent-gold: #a66f14;
     --accent-gold-soft: #f5ebd6;
-    --accent-navy: #14213d;
-    --accent-navy-hover: #1e3159;
-    --vishraam-primary-bg: rgba(180, 118, 20, 0.16);
-    --vishraam-primary-ink: #8a5508;
-    --vishraam-primary-border: #b87a14;
-    --vishraam-secondary-bg: rgba(15, 118, 110, 0.14);
-    --vishraam-secondary-ink: #0f6b64;
-    --vishraam-secondary-border: #0f766e;
+    --accent-navy: #0f172a;
+    --accent-navy-hover: #1e2d4a;
   }
 
   .theme-parchment {
-    --surface-canvas: #f5efe2;
-    --surface-card: #fbf7ee;
-    --surface-subtle: #ece3d0;
-    --surface-elevated: #fdfaf3;
-    --border-hairline: #ddd2bc;
-    --border-strong: #c4b496;
-    --ink-primary: #241b12;
-    --ink-secondary: #534231;
-    --ink-muted: #75624e;
+    --surface-canvas: #f5ebd6;
+    --surface-card: #faf5e8;
+    --surface-subtle: #ede0c6;
+    --surface-elevated: #fcf9f0;
+    --border-hairline: #ddd0b5;
+    --border-strong: #c4b18d;
+    --ink-primary: #22190f;
+    --ink-secondary: #513f2d;
+    --ink-muted: #735f4a;
     --accent-gold: #9a600c;
     --accent-gold-soft: #eadbc0;
-    --accent-navy: #1c2c4c;
-    --accent-navy-hover: #283d66;
-    --vishraam-primary-bg: rgba(168, 96, 8, 0.18);
-    --vishraam-primary-ink: #7d4706;
-    --vishraam-primary-border: #a86008;
-    --vishraam-secondary-bg: rgba(15, 110, 95, 0.15);
-    --vishraam-secondary-ink: #0c5e52;
-    --vishraam-secondary-border: #0f6e5f;
+    --accent-navy: #0f172a;
+    --accent-navy-hover: #1e2d4a;
   }
 
   .dark {
-    --surface-canvas: #0b111e;
+    --surface-canvas: #0b1220;
     --surface-card: #121c2e;
-    --surface-subtle: #1b2842;
-    --surface-elevated: #18233a;
-    --border-hairline: #293a59;
-    --border-strong: #3d5278;
+    --surface-subtle: #1a2740;
+    --surface-elevated: #172338;
+    --border-hairline: #283856;
+    --border-strong: #3c5177;
     --ink-primary: #f4efe6;
     --ink-secondary: #d3dce9;
     --ink-muted: #9aa8c0;
-    --accent-gold: #f0bc5e;
-    --accent-gold-soft: rgba(240, 188, 94, 0.18);
-    --accent-navy: #f0bc5e;
-    --accent-navy-hover: #f7cd7c;
-    --vishraam-primary-bg: rgba(240, 188, 94, 0.22);
-    --vishraam-primary-ink: #fde08d;
-    --vishraam-primary-border: #f59e0b;
-    --vishraam-secondary-bg: rgba(45, 212, 191, 0.2);
-    --vishraam-secondary-ink: #72f0dc;
-    --vishraam-secondary-border: #2dd4bf;
+    --accent-gold: #d4af37;
+    --accent-gold-soft: rgba(212, 175, 55, 0.18);
+    --accent-navy: #d4af37;
+    --accent-navy-hover: #e5c455;
   }
 
   html {
@@ -90,47 +72,17 @@
 }
 
 .font-gurmukhi-noto {
-  font-family: 'Noto Sans Gurmukhi', sans-serif;
+  font-family: 'Noto Sans Gurmukhi', 'Mukta Mahee', 'Raavi', 'Gurmukhi MN', sans-serif;
   font-feature-settings: 'kern' 1, 'liga' 1;
 }
 
-.font-gurmukhi-akhar {
-  font-family: 'Tiro Gurmukhi', 'Noto Sans Gurmukhi', serif;
-  font-weight: 600;
-  letter-spacing: 0.015em;
-  text-shadow: 0.015em 0 0 currentColor;
-}
-
-.dark .font-gurmukhi-noto,
-.dark .font-gurmukhi-akhar {
+.dark .font-gurmukhi-noto {
   letter-spacing: 0.012em;
 }
 
 .font-mono-nums {
   font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-variant-numeric: tabular-nums;
-}
-
-.vishraam-primary {
-  background-color: var(--vishraam-primary-bg);
-  color: var(--vishraam-primary-ink);
-  border-bottom: 2px solid var(--vishraam-primary-border);
-  border-radius: 2px;
-  padding: 0 2px;
-}
-
-.vishraam-secondary {
-  background-color: var(--vishraam-secondary-bg);
-  color: var(--vishraam-secondary-ink);
-  border-bottom: 2px dashed var(--vishraam-secondary-border);
-  border-radius: 2px;
-  padding: 0 2px;
-}
-
-.larivaar-mode .vishraam-primary,
-.larivaar-mode .vishraam-secondary {
-  padding: 0;
-  border-radius: 0;
 }
 
 .pothi-surface {

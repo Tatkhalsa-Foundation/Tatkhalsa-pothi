@@ -1,24 +1,26 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowLeft,
   ArrowRight,
+  Bookmark,
   BookMarked,
   Check,
   Layers,
   MonitorPlay,
   Moon,
+  ShieldAlert,
   SlidersHorizontal,
   Sun,
 } from 'lucide-react';
+import { FULL_SEARCH_CORPUS } from '../data/fullSearchCorpus';
 import {
   GRANTH_CATALOG,
   GRANTH_LIST,
-  GURBANI_CORPUS,
   getRaagForSggsAng,
 } from '../data/gurbaniCorpus';
 import type {
+  BookmarkItem,
   GranthId,
-  GurmukhiFont,
   QueueItem,
   ReaderSettings,
   ReaderTarget,
@@ -40,7 +42,22 @@ interface ScriptureReaderProps {
   queue: QueueItem[];
   onEnqueueCurrent: (item: QueueItem) => void;
   onLaunchPresenterWithItem: (item: QueueItem) => void;
+  bookmarks: BookmarkItem[];
+  onToggleBookmark: (candidate: Omit<BookmarkItem, 'savedAt'>) => void;
+  onOpenBookmark: (bookmark: BookmarkItem) => void;
 }
+
+const GRANTH_SHABADS = FULL_SEARCH_CORPUS.filter(
+  (s) => !s.baaniId && !s.pothiId,
+);
+
+const COMPACT_GRANTH_LABEL: Record<GranthId, string> = {
+  sggs: 'SGGSJ',
+  dasam: 'SGDGSJ',
+  sarbloh: 'SGSGSJ',
+  bgv: 'Bhai Gurdas Ji',
+  bnl: 'Bhai Nand Lal Ji',
+};
 
 export const ScriptureReader: React.FC<ScriptureReaderProps> = ({
   target,
@@ -52,9 +69,28 @@ export const ScriptureReader: React.FC<ScriptureReaderProps> = ({
   queue,
   onEnqueueCurrent,
   onLaunchPresenterWithItem,
+  bookmarks,
+  onToggleBookmark,
+  onOpenBookmark,
 }) => {
   const [showControls, setShowControls] = useState(true);
+  const [showBookmarksPanel, setShowBookmarksPanel] = useState(false);
   const [angInput, setAngInput] = useState('');
+  const [activeTukIndex, setActiveTukIndex] = useState<number | null>(null);
+  const tukRefs = useRef<Array<HTMLDivElement | null>>([]);
+
+  useEffect(() => {
+    setActiveTukIndex(null);
+  }, [target]);
+
+  useEffect(() => {
+    if (activeTukIndex !== null) {
+      const el = tukRefs.current[activeTukIndex];
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  }, [activeTukIndex]);
 
   // Resolve active reading content based on ReaderTarget
   const resolved = useMemo(() => {
@@ -71,15 +107,24 @@ export const ScriptureReader: React.FC<ScriptureReaderProps> = ({
           granth: data.baani.granthSource,
           tuks: data.tuks,
         };
+        const bookmarkCandidate: Omit<BookmarkItem, 'savedAt'> = {
+          id: `baani:${data.pothi.id}:${data.baani.id}`,
+          kind: 'baani',
+          titleGurmukhi: data.baani.nameGurmukhi,
+          titleEnglish: data.baani.nameEnglish,
+          subtitle: `${data.pothi.name} · ${data.baani.timeOfDay}`,
+          granth: data.baani.granthSource,
+          baaniId: data.baani.id,
+          pothiId: data.pothi.id,
+        };
         return {
           headingGurmukhi: data.baani.nameGurmukhi,
           headingEnglish: data.baani.nameEnglish,
           metaLine: `${data.pothi.name} · ${data.baani.timeOfDay} · ${GRANTH_CATALOG[data.baani.granthSource].shortName}`,
           maryadaNote: data.openingNote,
           tuks: data.tuks,
-          audioLabel: data.baani.audioLabel,
-          audioUrl: data.baani.audioUrl,
           queueItem,
+          bookmarkCandidate,
           activeGranth: data.baani.granthSource,
           activeAng: null as number | null,
           highlightTukId: undefined as string | undefined,
@@ -99,15 +144,23 @@ export const ScriptureReader: React.FC<ScriptureReaderProps> = ({
         granth: 'dasam',
         tuks: pothi.ardaas.tuks,
       };
+      const bookmarkCandidate: Omit<BookmarkItem, 'savedAt'> = {
+        id: `ardaas:${pothi.id}`,
+        kind: 'ardaas',
+        titleGurmukhi: pothi.ardaas.titleGurmukhi,
+        titleEnglish: pothi.ardaas.titleEnglish,
+        subtitle: `${pothi.name} · Isolated Sampardai Ardaas`,
+        granth: 'dasam',
+        pothiId: pothi.id,
+      };
       return {
         headingGurmukhi: pothi.ardaas.titleGurmukhi,
         headingEnglish: pothi.ardaas.titleEnglish,
         metaLine: `${pothi.lineage} · ${pothi.region}`,
         maryadaNote: pothi.ardaas.maryadaNote,
         tuks: pothi.ardaas.tuks,
-        audioLabel: `Santhya — ${pothi.ardaas.titleEnglish}`,
-        audioUrl: undefined,
         queueItem,
+        bookmarkCandidate,
         activeGranth: 'dasam' as GranthId,
         activeAng: null as number | null,
         highlightTukId: undefined as string | undefined,
@@ -116,7 +169,8 @@ export const ScriptureReader: React.FC<ScriptureReaderProps> = ({
 
     if (target.mode === 'shabad') {
       const shabad =
-        GURBANI_CORPUS.find((s) => s.id === target.shabadId) ?? GURBANI_CORPUS[0];
+        FULL_SEARCH_CORPUS.find((s) => s.id === target.shabadId) ??
+        GRANTH_SHABADS[0];
       const meta = GRANTH_CATALOG[shabad.granth];
       const queueItem: QueueItem = {
         id: `shabad:${shabad.id}`,
@@ -129,28 +183,37 @@ export const ScriptureReader: React.FC<ScriptureReaderProps> = ({
         ang: shabad.ang,
         tuks: shabad.tuks,
       };
+      const bookmarkCandidate: Omit<BookmarkItem, 'savedAt'> = {
+        id: `shabad:${shabad.id}`,
+        kind: 'shabad',
+        titleGurmukhi: shabad.titleGurmukhi,
+        titleEnglish: shabad.titleEnglish,
+        subtitle: `${meta.shortName} · ${meta.unitLabel} ${shabad.ang} · ${shabad.raag}`,
+        granth: shabad.granth,
+        ang: shabad.ang,
+        shabadId: shabad.id,
+      };
       return {
         headingGurmukhi: shabad.titleGurmukhi,
         headingEnglish: shabad.titleEnglish,
         metaLine: `${meta.shortName} · ${meta.unitLabel} ${shabad.ang} · ${shabad.raag} · ${shabad.author}`,
         maryadaNote: null as string | null,
         tuks: shabad.tuks,
-        audioLabel: shabad.audioLabel ?? `Santhya — ${meta.unitLabel} ${shabad.ang}`,
-        audioUrl: shabad.audioUrl,
         queueItem,
+        bookmarkCandidate,
         activeGranth: shabad.granth,
         activeAng: shabad.ang,
         highlightTukId: target.highlightTukId,
       };
     }
 
-    // Mode: 'ang' (Sehaj Paath Ang-by-Ang) or fallback when Baani ID isn't found
+    // Mode: 'ang' (Sehaj Paath Ang-by-Ang) or fallback
     const granth: GranthId = target.mode === 'ang' ? target.granth : 'sggs';
     const meta = GRANTH_CATALOG[granth];
     const requestedAng = target.mode === 'ang' ? target.ang : 1;
     const ang = Math.max(1, Math.min(meta.maxAng, requestedAng));
     const highlightTukId = target.mode === 'ang' ? target.highlightTukId : undefined;
-    const matchingShabads = GURBANI_CORPUS.filter(
+    const matchingShabads = GRANTH_SHABADS.filter(
       (s) => s.granth === granth && s.ang === ang,
     );
 
@@ -168,23 +231,39 @@ export const ScriptureReader: React.FC<ScriptureReaderProps> = ({
         ang,
         tuks: combinedTuks,
       };
+      const bookmarkCandidate: Omit<BookmarkItem, 'savedAt'> = {
+        id: `ang:${granth}:${ang}`,
+        kind: 'ang',
+        titleGurmukhi: first.titleGurmukhi,
+        titleEnglish: `${meta.shortName} — ${meta.unitLabel} ${ang}`,
+        subtitle: `${meta.shortName} · ${meta.unitLabel} ${ang} of ${meta.maxAng} · ${first.raag}`,
+        granth,
+        ang,
+      };
       return {
         headingGurmukhi: first.titleGurmukhi,
         headingEnglish: `${meta.shortName} — ${meta.unitLabel} ${ang}`,
         metaLine: `${meta.shortName} · ${meta.unitLabel} ${ang} of ${meta.maxAng} · ${first.raag} · ${first.author}`,
         maryadaNote: null as string | null,
         tuks: combinedTuks,
-        audioLabel: first.audioLabel ?? `Santhya — ${meta.shortName} ${meta.unitLabel} ${ang}`,
-        audioUrl: first.audioUrl,
         queueItem,
+        bookmarkCandidate,
         activeGranth: granth,
         activeAng: ang,
         highlightTukId,
       };
     }
 
-    // Intermediate Ang within full 1..maxAng Sehaj Paath range
     const sggsSection = granth === 'sggs' ? getRaagForSggsAng(ang) : null;
+    const bookmarkCandidate: Omit<BookmarkItem, 'savedAt'> = {
+      id: `ang:${granth}:${ang}`,
+      kind: 'ang',
+      titleGurmukhi: sggsSection ? sggsSection.gurmukhi : meta.gurmukhiName,
+      titleEnglish: `${meta.shortName} — ${meta.unitLabel} ${ang}`,
+      subtitle: `${meta.shortName} · ${meta.unitLabel} ${ang} of ${meta.maxAng}`,
+      granth,
+      ang,
+    };
     return {
       headingGurmukhi: sggsSection ? sggsSection.gurmukhi : meta.gurmukhiName,
       headingEnglish: `${meta.shortName} — ${meta.unitLabel} ${ang}`,
@@ -193,9 +272,8 @@ export const ScriptureReader: React.FC<ScriptureReaderProps> = ({
         : `${meta.shortName} · ${meta.unitLabel} ${ang} of ${meta.maxAng}`,
       maryadaNote: null as string | null,
       tuks: [] as Tuk[],
-      audioLabel: `Santhya — ${meta.shortName} ${meta.unitLabel} ${ang}`,
-      audioUrl: undefined,
       queueItem: null as QueueItem | null,
+      bookmarkCandidate,
       activeGranth: granth,
       activeAng: ang,
       highlightTukId: undefined as string | undefined,
@@ -206,7 +284,7 @@ export const ScriptureReader: React.FC<ScriptureReaderProps> = ({
     const granth = resolved.activeGranth;
     return Array.from(
       new Set(
-        GURBANI_CORPUS.filter((s) => s.granth === granth).map((s) => s.ang),
+        GRANTH_SHABADS.filter((s) => s.granth === granth).map((s) => s.ang),
       ),
     ).sort((a, b) => a - b);
   }, [resolved.activeGranth]);
@@ -214,6 +292,10 @@ export const ScriptureReader: React.FC<ScriptureReaderProps> = ({
   const isQueued = resolved.queueItem
     ? queue.some((q) => q.id === resolved.queueItem?.id)
     : false;
+
+  const isBookmarked = bookmarks.some(
+    (b) => b.id === resolved.bookmarkCandidate.id,
+  );
 
   const handleSelectGranth = (granth: GranthId) => {
     const savedAng = sehajProgress[granth] ?? 1;
@@ -261,15 +343,16 @@ export const ScriptureReader: React.FC<ScriptureReaderProps> = ({
                   key={g.id}
                   type="button"
                   role="tab"
+                  title={g.fullName}
                   aria-selected={active}
                   onClick={() => handleSelectGranth(g.id)}
                   className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors whitespace-nowrap cursor-pointer min-h-[36px] ${
                     active
-                      ? 'bg-[var(--accent-navy)] text-white dark:text-[#0c1220]'
+                      ? 'bg-[var(--accent-navy)] text-white dark:text-[#0B1220]'
                       : 'bg-[var(--surface-subtle)] text-[var(--ink-secondary)] hover:text-[var(--ink-primary)]'
                   }`}
                 >
-                  {g.shortName.replace('Sri ', '').replace(' Sahib Ji', '')}{' '}
+                  {COMPACT_GRANTH_LABEL[g.id]}{' '}
                   <span className="font-mono-nums opacity-80">
                     ({sehajProgress[g.id]})
                   </span>
@@ -278,16 +361,64 @@ export const ScriptureReader: React.FC<ScriptureReaderProps> = ({
             })}
           </div>
 
-          <button
-            type="button"
-            onClick={() => setShowControls((v) => !v)}
-            aria-expanded={showControls}
-            className="inline-flex items-center gap-1.5 rounded-lg border pothi-divider px-3 py-1.5 text-xs font-medium text-[var(--ink-secondary)] hover:bg-[var(--surface-subtle)] cursor-pointer min-h-[36px] whitespace-nowrap"
-          >
-            <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden="true" />
-            {showControls ? 'Hide Controls' : 'Reading Controls'}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShowBookmarksPanel((v) => !v)}
+              aria-expanded={showBookmarksPanel}
+              className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer min-h-[36px] whitespace-nowrap ${
+                showBookmarksPanel
+                  ? 'border-[var(--accent-gold)] bg-[var(--accent-gold-soft)] text-[var(--ink-primary)]'
+                  : 'pothi-divider text-[var(--ink-secondary)] hover:bg-[var(--surface-subtle)]'
+              }`}
+            >
+              <Bookmark className="h-3.5 w-3.5" aria-hidden="true" />
+              Saved ({bookmarks.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowControls((v) => !v)}
+              aria-expanded={showControls}
+              className="inline-flex items-center gap-1.5 rounded-lg border pothi-divider px-3 py-1.5 text-xs font-medium text-[var(--ink-secondary)] hover:bg-[var(--surface-subtle)] cursor-pointer min-h-[36px] whitespace-nowrap"
+            >
+              <SlidersHorizontal className="h-3.5 w-3.5" aria-hidden="true" />
+              {showControls ? 'Hide Controls' : 'Reading Controls'}
+            </button>
+          </div>
         </div>
+
+        {/* Saved Bookmarks Quick Switcher */}
+        {showBookmarksPanel && (
+          <div className="rounded-xl border pothi-divider bg-[var(--surface-subtle)]/70 p-3.5 space-y-2.5">
+            <p className="text-xs font-semibold text-[var(--ink-primary)]">
+              Saved Bookmarks ({bookmarks.length})
+            </p>
+            {bookmarks.length === 0 ? (
+              <p className="text-xs text-[var(--ink-muted)]">
+                No saved bookmarks yet. Click Bookmark on any Shabad, Ang, or Baani to pin it here.
+              </p>
+            ) : (
+              <div className="flex flex-wrap gap-2">
+                {bookmarks.map((bm) => (
+                  <button
+                    key={bm.id}
+                    type="button"
+                    onClick={() => {
+                      onOpenBookmark(bm);
+                      setShowBookmarksPanel(false);
+                    }}
+                    className="inline-flex items-center gap-2 rounded-lg border pothi-divider bg-[var(--surface-card)] px-3 py-1.5 text-xs text-[var(--ink-primary)] hover:border-[var(--accent-gold)] cursor-pointer"
+                  >
+                    <span lang="pa" className="font-gurmukhi-noto font-medium">
+                      {bm.titleGurmukhi}
+                    </span>
+                    <span className="text-[var(--ink-muted)]">· {bm.titleEnglish}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Ang Stepper + Direct Jump */}
         <div className="flex flex-wrap items-center justify-between gap-3 pt-3 border-t pothi-divider">
@@ -377,7 +508,7 @@ export const ScriptureReader: React.FC<ScriptureReaderProps> = ({
         </div>
       </section>
 
-      {/* Typography, Larivaar, Vishraam, Translations & Theme Controls */}
+      {/* Typography, Larivaar, Phonetic, Exit Guard & Theme Controls */}
       {showControls && (
         <section
           aria-label="Reading Typography and Display Controls"
@@ -399,19 +530,6 @@ export const ScriptureReader: React.FC<ScriptureReaderProps> = ({
 
             <button
               type="button"
-              aria-pressed={settings.vishraam}
-              onClick={() => onUpdateSettings({ vishraam: !settings.vishraam })}
-              className={`rounded-lg border px-3 py-2 text-xs font-medium transition-colors cursor-pointer min-h-[38px] ${
-                settings.vishraam
-                  ? 'border-[var(--accent-gold)] bg-[var(--accent-gold-soft)] text-[var(--accent-gold)]'
-                  : 'pothi-divider text-[var(--ink-secondary)] hover:text-[var(--ink-primary)]'
-              }`}
-            >
-              Vishraam: {settings.vishraam ? 'On' : 'Off'}
-            </button>
-
-            <button
-              type="button"
               aria-pressed={settings.showTransliteration}
               onClick={() =>
                 onUpdateSettings({
@@ -424,48 +542,37 @@ export const ScriptureReader: React.FC<ScriptureReaderProps> = ({
                   : 'pothi-divider text-[var(--ink-secondary)] hover:text-[var(--ink-primary)]'
               }`}
             >
-              Transliteration
+              Phonetic: {settings.showTransliteration ? 'On' : 'Off'}
             </button>
 
             <button
               type="button"
-              aria-pressed={settings.showEnglish}
+              aria-pressed={settings.paathExitGuard}
               onClick={() =>
-                onUpdateSettings({ showEnglish: !settings.showEnglish })
+                onUpdateSettings({
+                  paathExitGuard: !settings.paathExitGuard,
+                })
               }
-              className={`rounded-lg border px-3 py-2 text-xs font-medium transition-colors cursor-pointer min-h-[38px] ${
-                settings.showEnglish
+              title="Prompt before accidentally reloading or closing the tab during Paath"
+              className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-colors cursor-pointer min-h-[38px] ${
+                settings.paathExitGuard
                   ? 'border-[var(--accent-gold)] bg-[var(--accent-gold-soft)] text-[var(--accent-gold)]'
                   : 'pothi-divider text-[var(--ink-secondary)] hover:text-[var(--ink-primary)]'
               }`}
             >
-              English
-            </button>
-
-            <button
-              type="button"
-              aria-pressed={settings.showTeeka}
-              onClick={() =>
-                onUpdateSettings({ showTeeka: !settings.showTeeka })
-              }
-              className={`rounded-lg border px-3 py-2 text-xs font-medium transition-colors cursor-pointer min-h-[38px] ${
-                settings.showTeeka
-                  ? 'border-[var(--accent-gold)] bg-[var(--accent-gold-soft)] text-[var(--accent-gold)]'
-                  : 'pothi-divider text-[var(--ink-secondary)] hover:text-[var(--ink-primary)]'
-              }`}
-            >
-              Teeka / Arth
+              <ShieldAlert className="h-3.5 w-3.5" aria-hidden="true" />
+              Paath Exit Guard: {settings.paathExitGuard ? 'On' : 'Off'}
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-3 border-t pothi-divider items-center">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-3 border-t pothi-divider items-center">
             {/* Font Size Slider */}
             <div className="flex items-center gap-3">
               <label
                 htmlFor="gurmukhi-font-size"
                 className="text-xs font-medium text-[var(--ink-secondary)] whitespace-nowrap"
               >
-                Size ({settings.fontSize}px)
+                Gurmukhi Size ({settings.fontSize}px)
               </label>
               <input
                 id="gurmukhi-font-size"
@@ -479,29 +586,6 @@ export const ScriptureReader: React.FC<ScriptureReaderProps> = ({
                 }
                 className="w-full accent-[var(--accent-gold)] cursor-pointer"
               />
-            </div>
-
-            {/* Gurmukhi Font Selector */}
-            <div className="flex items-center gap-2">
-              <label
-                htmlFor="gurmukhi-font-family"
-                className="text-xs font-medium text-[var(--ink-secondary)] whitespace-nowrap"
-              >
-                Font
-              </label>
-              <select
-                id="gurmukhi-font-family"
-                value={settings.gurmukhiFont}
-                onChange={(e) =>
-                  onUpdateSettings({
-                    gurmukhiFont: e.target.value as GurmukhiFont,
-                  })
-                }
-                className="flex-1 rounded-lg border pothi-divider bg-[var(--surface-canvas)] px-2.5 py-1.5 text-xs font-medium text-[var(--ink-primary)] min-h-[36px]"
-              >
-                <option value="Noto Sans Gurmukhi">Noto Sans Gurmukhi</option>
-                <option value="GurbaniAkharThick">GurbaniAkharThick</option>
-              </select>
             </div>
 
             {/* Theme Selector */}
@@ -539,26 +623,23 @@ export const ScriptureReader: React.FC<ScriptureReaderProps> = ({
             </div>
           </div>
 
-          {settings.vishraam && (
-            <div className="flex flex-wrap items-center gap-4 text-xs text-[var(--ink-muted)] pt-2 border-t pothi-divider">
-              <span>Vishraam Key:</span>
-              <span className="inline-flex items-center gap-1.5">
-                <span className="vishraam-primary font-gurmukhi-noto text-sm">ਠਹਿਰਾਉ</span>
-                <span>Primary Heavy Pause (solid underline)</span>
-              </span>
-              <span className="inline-flex items-center gap-1.5">
-                <span className="vishraam-secondary font-gurmukhi-noto text-sm">ਲਘੂ</span>
-                <span>Secondary Light Pause (dashed underline)</span>
-              </span>
-            </div>
-          )}
+          <p className="text-[11px] text-[var(--ink-muted)] pt-2 border-t pothi-divider">
+            Rendered in clean Unicode Gurmukhi (Noto Sans Gurmukhi). Phonetic Romanization is generated algorithmically on your device without external datasets.
+          </p>
         </section>
       )}
 
-      {/* Santhya Audio Bar */}
+      {/* Clean Empty-State Local-Only Tatkhalsa Santhya Audio Bar */}
       <SanthyaAudioBar
-        trackLabel={resolved.audioLabel}
-        initialAudioUrl={resolved.audioUrl}
+        contextTitle={resolved.headingEnglish}
+        tukCount={resolved.tuks.length}
+        activeTukIndex={activeTukIndex}
+        onActiveTukChange={setActiveTukIndex}
+        canAutoAdvanceNext={
+          target.mode === 'ang' &&
+          (resolved.activeAng ?? 1) < GRANTH_CATALOG[resolved.activeGranth].maxAng
+        }
+        onAutoAdvanceNext={() => handleStepAng(1)}
       />
 
       {/* Main Scripture Reading Surface */}
@@ -577,35 +658,54 @@ export const ScriptureReader: React.FC<ScriptureReaderProps> = ({
             </p>
           </div>
 
-          {resolved.queueItem && (
-            <div className="flex items-center gap-2 shrink-0">
-              <button
-                type="button"
-                onClick={() => onEnqueueCurrent(resolved.queueItem!)}
-                className="inline-flex items-center gap-1.5 rounded-lg border pothi-divider px-3.5 py-2 text-xs font-medium text-[var(--ink-secondary)] hover:border-[var(--accent-gold)] hover:text-[var(--ink-primary)] cursor-pointer min-h-[40px] whitespace-nowrap"
-              >
-                {isQueued ? (
-                  <>
-                    <Check className="h-3.5 w-3.5 text-[var(--accent-gold)]" aria-hidden="true" />
-                    In Queue
-                  </>
-                ) : (
-                  <>
-                    <Layers className="h-3.5 w-3.5" aria-hidden="true" />
-                    Add to Queue
-                  </>
-                )}
-              </button>
-              <button
-                type="button"
-                onClick={() => onLaunchPresenterWithItem(resolved.queueItem!)}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--accent-navy)] px-3.5 py-2 text-xs font-medium text-white dark:text-[#0c1220] hover:bg-[var(--accent-navy-hover)] cursor-pointer min-h-[40px] whitespace-nowrap"
-              >
-                <MonitorPlay className="h-3.5 w-3.5" aria-hidden="true" />
-                Present
-              </button>
-            </div>
-          )}
+          <div className="flex flex-wrap items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={() => onToggleBookmark(resolved.bookmarkCandidate)}
+              aria-pressed={isBookmarked}
+              className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-colors cursor-pointer min-h-[40px] whitespace-nowrap ${
+                isBookmarked
+                  ? 'border-[var(--accent-gold)] bg-[var(--accent-gold-soft)] text-[var(--ink-primary)]'
+                  : 'pothi-divider text-[var(--ink-secondary)] hover:border-[var(--accent-gold)] hover:text-[var(--ink-primary)]'
+              }`}
+            >
+              <Bookmark
+                className={`h-3.5 w-3.5 ${isBookmarked ? 'fill-[var(--accent-gold)] text-[var(--accent-gold)]' : ''}`}
+                aria-hidden="true"
+              />
+              {isBookmarked ? 'Bookmarked' : 'Bookmark'}
+            </button>
+
+            {resolved.queueItem && (
+              <>
+                <button
+                  type="button"
+                  onClick={() => onEnqueueCurrent(resolved.queueItem!)}
+                  className="inline-flex items-center gap-1.5 rounded-lg border pothi-divider px-3 py-2 text-xs font-medium text-[var(--ink-secondary)] hover:border-[var(--accent-gold)] hover:text-[var(--ink-primary)] cursor-pointer min-h-[40px] whitespace-nowrap"
+                >
+                  {isQueued ? (
+                    <>
+                      <Check className="h-3.5 w-3.5 text-[var(--accent-gold)]" aria-hidden="true" />
+                      In Queue
+                    </>
+                  ) : (
+                    <>
+                      <Layers className="h-3.5 w-3.5" aria-hidden="true" />
+                      Add to Queue
+                    </>
+                  )}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onLaunchPresenterWithItem(resolved.queueItem!)}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--accent-navy)] px-3.5 py-2 text-xs font-medium text-white dark:text-[#0B1220] hover:bg-[var(--accent-navy-hover)] cursor-pointer min-h-[40px] whitespace-nowrap"
+                >
+                  <MonitorPlay className="h-3.5 w-3.5" aria-hidden="true" />
+                  Present
+                </button>
+              </>
+            )}
+          </div>
         </header>
 
         {resolved.maryadaNote && (
@@ -619,19 +719,23 @@ export const ScriptureReader: React.FC<ScriptureReaderProps> = ({
 
         {resolved.tuks.length > 0 ? (
           <div className="divide-y pothi-divider">
-            {resolved.tuks.map((tuk) => (
-              <TukLine
+            {resolved.tuks.map((tuk, index) => (
+              <div
                 key={tuk.id}
-                tuk={tuk}
-                larivaar={settings.larivaar}
-                vishraam={settings.vishraam}
-                showTransliteration={settings.showTransliteration}
-                showEnglish={settings.showEnglish}
-                showTeeka={settings.showTeeka}
-                fontSize={settings.fontSize}
-                gurmukhiFont={settings.gurmukhiFont}
-                highlighted={resolved.highlightTukId === tuk.id}
-              />
+                ref={(el) => {
+                  tukRefs.current[index] = el;
+                }}
+              >
+                <TukLine
+                  tuk={tuk}
+                  larivaar={settings.larivaar}
+                  showTransliteration={settings.showTransliteration}
+                  fontSize={settings.fontSize}
+                  highlighted={
+                    resolved.highlightTukId === tuk.id || activeTukIndex === index
+                  }
+                />
+              </div>
             ))}
           </div>
         ) : (
@@ -643,8 +747,9 @@ export const ScriptureReader: React.FC<ScriptureReaderProps> = ({
             <p className="text-sm text-[var(--ink-muted)] max-w-lg mx-auto">
               Your independent Sehaj Paath bookmark for{' '}
               <strong>{GRANTH_CATALOG[resolved.activeGranth].fullName}</strong> is saved locally at{' '}
-              {GRANTH_CATALOG[resolved.activeGranth].unitLabel} {resolved.activeAng}. Select an indexed landmark{' '}
-              {GRANTH_CATALOG[resolved.activeGranth].unitLabel} below to read full bundled Gurmukhi Tuks with Vishraam and Teeka.
+              {GRANTH_CATALOG[resolved.activeGranth].unitLabel} {resolved.activeAng} of{' '}
+              {GRANTH_CATALOG[resolved.activeGranth].maxAng}. Select an indexed landmark{' '}
+              {GRANTH_CATALOG[resolved.activeGranth].unitLabel} below to read bundled public-domain Unicode Gurmukhi Tuks.
             </p>
             <div className="flex flex-wrap justify-center gap-2 pt-2">
               {landmarkAngsForGranth.map((angNum) => (
