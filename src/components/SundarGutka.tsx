@@ -117,7 +117,7 @@ export const SundarGutka: React.FC<SundarGutkaProps> = ({
                     onSelectPothi(p.id);
                     setShowAllPothis(false);
                   }}
-                  className={`text-left rounded-xl border p-3.5 transition-colors cursor-pointer ${
+                  className={`text-left rounded-xl border p-3.5 cursor-pointer ${
                     selected
                       ? 'border-[var(--accent-gold)] bg-[var(--accent-gold-soft)]/60'
                       : 'pothi-divider bg-[var(--surface-canvas)] hover:border-[var(--accent-gold)]'
@@ -182,7 +182,7 @@ export const SundarGutka: React.FC<SundarGutkaProps> = ({
             return (
               <div
                 key={baani.id}
-                className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-[var(--surface-subtle)]/40 transition-colors"
+                className="p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:bg-[var(--surface-subtle)]/40"
               >
                 <div className="space-y-1 flex-1 min-w-0">
                   <p className="text-xs text-[var(--ink-muted)]">
@@ -266,7 +266,7 @@ export const SundarGutka: React.FC<SundarGutkaProps> = ({
           <button
             type="button"
             onClick={() => onOpenArdaas(activePothiId)}
-            className="inline-flex items-center gap-2 rounded-lg bg-[var(--accent-navy)] px-4 py-2.5 text-xs font-medium text-white dark:text-[#0B1220] hover:bg-[var(--accent-navy-hover)] transition-colors cursor-pointer min-h-[42px] whitespace-nowrap shrink-0"
+            className="inline-flex items-center gap-2 rounded-lg bg-[var(--accent-navy)] px-4 py-2.5 text-xs font-medium text-white dark:text-[#0B1220] hover:bg-[var(--accent-navy-hover)] cursor-pointer min-h-[42px] whitespace-nowrap shrink-0"
           >
             Read Full Sampardai Ardaas
             <ArrowRight className="h-4 w-4" aria-hidden="true" />

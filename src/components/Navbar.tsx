@@ -74,7 +74,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     onNavigate(item.route);
                   }}
                   aria-current={active ? 'page' : undefined}
-                  className={`relative py-2 text-sm font-medium transition-colors whitespace-nowrap shrink-0 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--accent-gold)] ${
+                  className={`relative py-2 text-sm font-medium whitespace-nowrap shrink-0 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--accent-gold)] ${
                     active
                       ? 'text-[var(--ink-primary)]'
                       : 'text-[var(--ink-muted)] hover:text-[var(--ink-primary)]'
@@ -99,7 +99,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               type="button"
               onClick={onOpenQueue}
               aria-label={`Open Shabad Queue (${queueCount} queued)`}
-              className="inline-flex items-center gap-2 rounded-lg bg-[var(--accent-navy)] px-3.5 py-2 text-xs sm:text-sm font-medium text-white dark:text-[#0B1220] hover:bg-[var(--accent-navy-hover)] transition-colors whitespace-nowrap shrink-0 min-h-[38px] md:min-h-[40px] cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent-gold)]"
+              className="inline-flex items-center gap-2 rounded-lg bg-[var(--accent-navy)] px-3.5 py-2 text-xs sm:text-sm font-medium text-white dark:text-[#0B1220] hover:bg-[var(--accent-navy-hover)] whitespace-nowrap shrink-0 min-h-[38px] md:min-h-[40px] cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent-gold)]"
             >
               <Layers className="h-4 w-4 shrink-0" aria-hidden="true" />
               <span>
@@ -125,7 +125,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 type="button"
                 onClick={() => onNavigate(item.route)}
                 aria-current={active ? 'page' : undefined}
-                className={`flex flex-col items-center justify-center min-h-[44px] py-1 transition-colors cursor-pointer ${
+                className={`flex flex-col items-center justify-center min-h-[44px] py-1 cursor-pointer ${
                   active
                     ? 'text-[var(--accent-gold)] font-semibold'
                     : 'text-[var(--ink-muted)]'

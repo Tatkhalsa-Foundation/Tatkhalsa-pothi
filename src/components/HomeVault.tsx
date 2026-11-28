@@ -15,8 +15,8 @@ import {
   Sun,
   Trash2,
 } from 'lucide-react';
-import heroParchmentImg from '../assets/images/hero_pothi_parchment_1795425542305.jpg';
-import darbarFiligreeImg from '../assets/images/darbar_marble_filigree_1795425539948.jpg';
+import heroParchmentImg from '../assets/images/hero_pothi_parchment.webp';
+import darbarFiligreeImg from '../assets/images/darbar_marble_filigree.webp';
 import {
   GRANTH_CATALOG,
   GURBANI_CORPUS,
@@ -98,7 +98,12 @@ export const HomeVault: React.FC<HomeVaultProps> = ({
           {!heroImgFailed && (
             <img
               src={heroParchmentImg}
-              alt="Warm archival parchment background for Tatkhalsa Pothi Sahib"
+              alt=""
+              aria-hidden="true"
+              width={800}
+              height={446}
+              fetchPriority="high"
+              decoding="async"
               referrerPolicy="no-referrer"
               onError={() => setHeroImgFailed(true)}
               className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-20 dark:opacity-12"
@@ -124,7 +129,7 @@ export const HomeVault: React.FC<HomeVaultProps> = ({
               <button
                 type="button"
                 onClick={() => onNavigate('/searcher')}
-                className="inline-flex items-center gap-2 rounded-lg bg-[var(--accent-navy)] px-5 py-2.5 text-sm font-medium text-white dark:text-[#0B1220] hover:bg-[var(--accent-navy-hover)] transition-colors cursor-pointer min-h-[44px]"
+                className="inline-flex items-center gap-2 rounded-lg bg-[var(--accent-navy)] px-5 py-2.5 text-sm font-medium text-white dark:text-[#0B1220] hover:bg-[var(--accent-navy-hover)] cursor-pointer min-h-[44px]"
               >
                 <Search className="h-4 w-4" aria-hidden="true" />
                 Gurbani Searcher
@@ -132,7 +137,7 @@ export const HomeVault: React.FC<HomeVaultProps> = ({
               <button
                 type="button"
                 onClick={() => onNavigate('/gutka')}
-                className="inline-flex items-center gap-2 rounded-lg border pothi-divider bg-[var(--surface-card)] px-5 py-2.5 text-sm font-medium text-[var(--ink-primary)] hover:bg-[var(--surface-subtle)] transition-colors cursor-pointer min-h-[44px]"
+                className="inline-flex items-center gap-2 rounded-lg border pothi-divider bg-[var(--surface-card)] px-5 py-2.5 text-sm font-medium text-[var(--ink-primary)] hover:bg-[var(--surface-subtle)] cursor-pointer min-h-[44px]"
               >
                 <ScrollText className="h-4 w-4 text-[var(--accent-gold)]" aria-hidden="true" />
                 Sundar Gutka
@@ -142,7 +147,7 @@ export const HomeVault: React.FC<HomeVaultProps> = ({
                 onClick={() =>
                   latestHistory ? onOpenHistory(latestHistory) : onNavigate('/reader')
                 }
-                className="inline-flex items-center gap-2 rounded-lg border pothi-divider bg-[var(--surface-card)] px-4 py-2.5 text-sm font-medium text-[var(--ink-primary)] hover:border-[var(--accent-gold)] hover:bg-[var(--surface-subtle)] transition-colors cursor-pointer min-h-[44px]"
+                className="inline-flex items-center gap-2 rounded-lg border pothi-divider bg-[var(--surface-card)] px-4 py-2.5 text-sm font-medium text-[var(--ink-primary)] hover:border-[var(--accent-gold)] hover:bg-[var(--surface-subtle)] cursor-pointer min-h-[44px]"
               >
                 <BookOpen className="h-4 w-4 text-[var(--accent-gold)]" aria-hidden="true" />
                 {latestHistory ? 'Continue Where You Left Off' : 'Sehaj Paath Reader'}
@@ -150,7 +155,7 @@ export const HomeVault: React.FC<HomeVaultProps> = ({
               <button
                 type="button"
                 onClick={() => onNavigate('/pothi-present')}
-                className="inline-flex items-center gap-2 rounded-lg border pothi-divider bg-[var(--surface-card)] px-4 py-2.5 text-sm font-medium text-[var(--ink-secondary)] hover:text-[var(--ink-primary)] hover:bg-[var(--surface-subtle)] transition-colors cursor-pointer min-h-[44px]"
+                className="inline-flex items-center gap-2 rounded-lg border pothi-divider bg-[var(--surface-card)] px-4 py-2.5 text-sm font-medium text-[var(--ink-secondary)] hover:text-[var(--ink-primary)] hover:bg-[var(--surface-subtle)] cursor-pointer min-h-[44px]"
               >
                 <MonitorPlay className="h-4 w-4" aria-hidden="true" />
                 Presenter Mode
@@ -186,7 +191,7 @@ export const HomeVault: React.FC<HomeVaultProps> = ({
                     type="button"
                     onClick={() => onChangeTheme(t.id)}
                     aria-pressed={active}
-                    className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors cursor-pointer whitespace-nowrap ${
+                    className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-medium cursor-pointer whitespace-nowrap ${
                       active
                         ? 'bg-[var(--surface-card)] text-[var(--ink-primary)] shadow-xs'
                         : 'text-[var(--ink-muted)] hover:text-[var(--ink-primary)]'
@@ -247,7 +252,7 @@ export const HomeVault: React.FC<HomeVaultProps> = ({
               <button
                 type="button"
                 onClick={() => onEnqueueShabad(hukamnama)}
-                className="inline-flex items-center gap-1.5 rounded-lg border pothi-divider px-3 py-2 text-xs font-medium text-[var(--ink-secondary)] hover:bg-[var(--surface-subtle)] transition-colors cursor-pointer min-h-[38px]"
+                className="inline-flex items-center gap-1.5 rounded-lg border pothi-divider px-3 py-2 text-xs font-medium text-[var(--ink-secondary)] hover:bg-[var(--surface-subtle)] cursor-pointer min-h-[38px]"
               >
                 {isHukamQueued ? (
                   <>
@@ -264,7 +269,7 @@ export const HomeVault: React.FC<HomeVaultProps> = ({
               <button
                 type="button"
                 onClick={() => onOpenShabad(hukamnama.id)}
-                className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--accent-navy)] px-3.5 py-2 text-xs font-medium text-white dark:text-[#0B1220] hover:bg-[var(--accent-navy-hover)] transition-colors cursor-pointer min-h-[38px]"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--accent-navy)] px-3.5 py-2 text-xs font-medium text-white dark:text-[#0B1220] hover:bg-[var(--accent-navy-hover)] cursor-pointer min-h-[38px]"
               >
                 Read Full Shabad
                 <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
@@ -294,11 +299,13 @@ export const HomeVault: React.FC<HomeVaultProps> = ({
             aria-label="Filter saved bookmarks or reading history"
           >
             <button
+              id="tab-saved-bookmarks"
               type="button"
               role="tab"
               aria-selected={savedTab === 'bookmarks'}
+              aria-controls="panel-saved-history"
               onClick={() => setSavedTab('bookmarks')}
-              className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium cursor-pointer transition-colors ${
+              className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium cursor-pointer ${
                 savedTab === 'bookmarks'
                   ? 'bg-[var(--surface-card)] text-[var(--ink-primary)] shadow-xs'
                   : 'text-[var(--ink-muted)] hover:text-[var(--ink-primary)]'
@@ -308,11 +315,13 @@ export const HomeVault: React.FC<HomeVaultProps> = ({
               Saved / Bookmarks ({bookmarks.length})
             </button>
             <button
+              id="tab-recent-history"
               type="button"
               role="tab"
               aria-selected={savedTab === 'history'}
+              aria-controls="panel-saved-history"
               onClick={() => setSavedTab('history')}
-              className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium cursor-pointer transition-colors ${
+              className={`inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium cursor-pointer ${
                 savedTab === 'history'
                   ? 'bg-[var(--surface-card)] text-[var(--ink-primary)] shadow-xs'
                   : 'text-[var(--ink-muted)] hover:text-[var(--ink-primary)]'
@@ -324,6 +333,13 @@ export const HomeVault: React.FC<HomeVaultProps> = ({
           </div>
         </div>
 
+        <div
+          id="panel-saved-history"
+          role="tabpanel"
+          aria-labelledby={
+            savedTab === 'bookmarks' ? 'tab-saved-bookmarks' : 'tab-recent-history'
+          }
+        >
         {savedTab === 'bookmarks' ? (
           bookmarks.length === 0 ? (
             <div className="rounded-xl border pothi-divider pothi-surface p-5 flex flex-wrap items-center justify-between gap-3">
@@ -352,7 +368,7 @@ export const HomeVault: React.FC<HomeVaultProps> = ({
                   >
                     <p
                       lang="pa"
-                      className="font-gurmukhi-noto text-lg font-semibold text-[var(--ink-primary)] group-hover:text-[var(--accent-gold)] transition-colors"
+                      className="font-gurmukhi-noto text-lg font-semibold text-[var(--ink-primary)] group-hover:text-[var(--accent-gold)]"
                     >
                       {bm.titleGurmukhi}
                     </p>
@@ -393,7 +409,7 @@ export const HomeVault: React.FC<HomeVaultProps> = ({
                 key={entry.id}
                 type="button"
                 onClick={() => onOpenHistory(entry)}
-                className="group text-left rounded-xl border pothi-divider pothi-surface p-4 hover:border-[var(--accent-gold)] transition-colors cursor-pointer"
+                className="group text-left rounded-xl border pothi-divider pothi-surface p-4 hover:border-[var(--accent-gold)] cursor-pointer"
               >
                 <div className="flex items-center justify-between gap-2 text-[11px] text-[var(--ink-muted)]">
                   <span className="uppercase tracking-wider">{entry.kind}</span>
@@ -416,6 +432,7 @@ export const HomeVault: React.FC<HomeVaultProps> = ({
             ))}
           </div>
         )}
+        </div>
       </section>
 
       {/* Sehaj Paath Independent Resume Cards */}
@@ -467,8 +484,8 @@ export const HomeVault: React.FC<HomeVaultProps> = ({
                   </div>
                   <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-[var(--surface-subtle)]">
                     <div
-                      className="h-full rounded-full bg-[var(--accent-gold)] transition-all"
-                      style={{ width: `${pct}%` }}
+                      className="h-full w-full origin-left rounded-full bg-[var(--accent-gold)]"
+                      style={{ transform: `scaleX(${pct / 100})` }}
                     />
                   </div>
                 </div>
@@ -476,7 +493,7 @@ export const HomeVault: React.FC<HomeVaultProps> = ({
                 <button
                   type="button"
                   onClick={() => onOpenAng(granthId, currentAng)}
-                  className="inline-flex items-center justify-between rounded-lg border pothi-divider bg-[var(--surface-subtle)] px-4 py-2.5 text-xs font-medium text-[var(--ink-primary)] hover:border-[var(--accent-gold)] transition-colors cursor-pointer min-h-[42px]"
+                  className="inline-flex items-center justify-between rounded-lg border pothi-divider bg-[var(--surface-subtle)] px-4 py-2.5 text-xs font-medium text-[var(--ink-primary)] hover:border-[var(--accent-gold)] cursor-pointer min-h-[42px]"
                 >
                   <span>Continue {meta.unitLabel} {currentAng}</span>
                   <BookOpen className="h-4 w-4 text-[var(--accent-gold)]" aria-hidden="true" />
@@ -496,7 +513,7 @@ export const HomeVault: React.FC<HomeVaultProps> = ({
                 key={granthId}
                 type="button"
                 onClick={() => onOpenAng(granthId, currentUnit)}
-                className="flex items-center justify-between gap-3 rounded-xl border pothi-divider pothi-surface px-4 py-3 text-left hover:border-[var(--accent-gold)] transition-colors cursor-pointer"
+                className="flex items-center justify-between gap-3 rounded-xl border pothi-divider pothi-surface px-4 py-3 text-left hover:border-[var(--accent-gold)] cursor-pointer"
               >
                 <div>
                   <p lang="pa" className="font-gurmukhi-noto text-base font-semibold text-[var(--ink-primary)]">
@@ -545,14 +562,14 @@ export const HomeVault: React.FC<HomeVaultProps> = ({
               key={baani.id}
               type="button"
               onClick={() => onOpenBaani(baani.id, activePothiId)}
-              className="group text-left rounded-xl border pothi-divider pothi-surface p-5 hover:border-[var(--accent-gold)] transition-colors cursor-pointer"
+              className="group text-left rounded-xl border pothi-divider pothi-surface p-5 hover:border-[var(--accent-gold)] cursor-pointer"
             >
               <div className="flex items-center justify-between text-xs text-[var(--ink-muted)]">
                 <span className="font-mono-nums">
                   {String(index + 1).padStart(2, '0')} · {baani.timeOfDay}
                 </span>
                 <ArrowRight
-                  className="h-4 w-4 text-[var(--ink-muted)] group-hover:text-[var(--accent-gold)] transition-colors"
+                  className="h-4 w-4 text-[var(--ink-muted)] group-hover:text-[var(--accent-gold)]"
                   aria-hidden="true"
                 />
               </div>
@@ -576,7 +593,12 @@ export const HomeVault: React.FC<HomeVaultProps> = ({
           {!vaultImgFailed && (
             <img
               src={darbarFiligreeImg}
-              alt="Carved white marble jaali lattice and warm brass archway in morning light"
+              alt=""
+              aria-hidden="true"
+              width={960}
+              height={536}
+              loading="lazy"
+              decoding="async"
               referrerPolicy="no-referrer"
               onError={() => setVaultImgFailed(true)}
               className="absolute inset-0 h-full w-full object-cover opacity-30"
@@ -608,7 +630,7 @@ export const HomeVault: React.FC<HomeVaultProps> = ({
             return (
               <div
                 key={pothi.id}
-                className={`rounded-xl border p-5 flex flex-col justify-between gap-4 transition-colors ${
+                className={`rounded-xl border p-5 flex flex-col justify-between gap-4 ${
                   isSelected
                     ? 'border-[var(--accent-gold)] bg-[var(--accent-gold-soft)]/50'
                     : 'pothi-divider pothi-surface'

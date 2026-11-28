@@ -46,9 +46,34 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..700;1,9..144,400..600&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+Gurmukhi:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+Gurmukhi:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+      onload="this.onload=null;this.rel='stylesheet'"
     />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+Gurmukhi:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
+
+    <!-- Apply saved/default theme synchronously before first paint to prevent FOUC and initial paint transitions -->
+    <script>
+      (function () {
+        try {
+          var raw = localStorage.getItem('tatkhalsa.pothi.readerSettings');
+          var theme = raw ? JSON.parse(raw).theme : 'parchment';
+          if (theme === 'dark') {
+            document.documentElement.classList.add('dark');
+          } else if (theme !== 'light') {
+            document.documentElement.classList.add('theme-parchment');
+          }
+        } catch (e) {
+          document.documentElement.classList.add('theme-parchment');
+        }
+      })();
+    </script>
 
     <!-- Schema.org Structured Data -->
     <script type="application/ld+json">

@@ -2,33 +2,50 @@
   AddType application/javascript .js .mjs
   AddType text/css .css
   AddType application/json .json
+  AddType application/manifest+json .webmanifest
   AddType image/svg+xml .svg
   AddType image/webp .webp
+  AddType font/woff2 .woff2
+  AddType font/woff .woff
+</IfModule>
+
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/html "access plus 0 seconds"
+  ExpiresByType application/manifest+json "access plus 0 seconds"
+  ExpiresByType text/css "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType text/javascript "access plus 1 year"
+  ExpiresByType image/webp "access plus 1 year"
+  ExpiresByType image/png "access plus 1 year"
+  ExpiresByType image/jpeg "access plus 1 year"
+  ExpiresByType image/svg+xml "access plus 1 year"
+  ExpiresByType image/x-icon "access plus 1 year"
+  ExpiresByType font/woff2 "access plus 1 year"
+  ExpiresByType font/woff "access plus 1 year"
 </IfModule>
 
 <IfModule mod_headers.c>
-  # Never cache HTML documents so browsers always receive fresh hashed asset references
-  <FilesMatch "\.html$">
+  # Long-term 1-year immutable caching for static & content-hashed assets (works on Apache + Hostinger LiteSpeed)
+  <FilesMatch "\.(js|mjs|css|webp|woff2|woff|png|jpe?g|svg|ico)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+
+  # Never cache HTML documents or Web App Manifest so browsers always receive fresh hashed asset references
+  <FilesMatch "\.(html|webmanifest)$">
     Header set Cache-Control "no-cache, no-store, must-revalidate, max-age=0"
     Header set Pragma "no-cache"
     Header set Expires "0"
   </FilesMatch>
 
-  # Never cache sw.js and strip ETag so service worker updates take effect cleanly
-  <FilesMatch "^sw\.js$">
+  # Never cache Service Worker entry files and strip ETag so PWA updates activate cleanly
+  <FilesMatch "^(sw|registerSW)\.js$">
     Header set Cache-Control "no-cache, no-store, must-revalidate, max-age=0"
     Header set Pragma "no-cache"
     Header set Expires "0"
     Header unset ETag
     FileETag None
   </FilesMatch>
-
-  # Long-term immutable caching strictly for Vite content-hashed files under /assets/*
-  <If "%{REQUEST_URI} =~ m#^/assets/#">
-    <FilesMatch "\.(js|mjs|css|webp|png|jpe?g|svg|ico)$">
-      Header set Cache-Control "public, max-age=31536000, immutable"
-    </FilesMatch>
-  </If>
 </IfModule>
 
 <IfModule mod_rewrite.c>
@@ -49,7 +66,7 @@
 
   # Never rewrite missing hashed assets to index.html (prevents text/html MIME errors)
   RewriteRule ^assets/ - [R=404,L]
-  RewriteRule \.(js|mjs|css|map|json|svg|png|jpe?g|webp|gif|ico|xml|txt)$ - [R=404,L]
+  RewriteRule \.(js|mjs|css|map|json|webmanifest|svg|png|jpe?g|webp|gif|ico|woff2|woff|xml|txt)$ - [R=404,L]
 
   # SPA fallback for client routes (/searcher, /gurbani, /gutka, /reader, /pothi-present)
   RewriteRule ^ /index.html [L]

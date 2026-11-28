@@ -170,7 +170,7 @@ export const QueueDrawer: React.FC<QueueDrawerProps> = ({
               onLaunchPresenter(0);
               onClose();
             }}
-            className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--accent-navy)] px-4 py-2.5 text-sm font-medium text-white dark:text-[#0c1220] hover:bg-[var(--accent-navy-hover)] disabled:opacity-40 transition-colors cursor-pointer min-h-[44px]"
+            className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-[var(--accent-navy)] px-4 py-2.5 text-sm font-medium text-white dark:text-[#0c1220] hover:bg-[var(--accent-navy-hover)] disabled:opacity-40 cursor-pointer min-h-[44px]"
           >
             <MonitorPlay className="h-4 w-4" aria-hidden="true" />
             Launch Presenter Mode
@@ -179,7 +179,7 @@ export const QueueDrawer: React.FC<QueueDrawerProps> = ({
             <button
               type="button"
               onClick={onClear}
-              className="w-full rounded-lg border pothi-divider px-4 py-2 text-xs font-medium text-[var(--ink-secondary)] hover:bg-[var(--surface-subtle)] transition-colors cursor-pointer min-h-[40px]"
+              className="w-full rounded-lg border pothi-divider px-4 py-2 text-xs font-medium text-[var(--ink-secondary)] hover:bg-[var(--surface-subtle)] cursor-pointer min-h-[40px]"
             >
               Clear Queue
             </button>

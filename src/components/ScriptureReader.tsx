@@ -332,7 +332,7 @@ export const ScriptureReader: React.FC<ScriptureReaderProps> = ({
       >
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div
-            role="tablist"
+            role="group"
             aria-label="Select Granth for Sehaj Paath"
             className="flex flex-wrap items-center gap-1.5"
           >
@@ -342,11 +342,10 @@ export const ScriptureReader: React.FC<ScriptureReaderProps> = ({
                 <button
                   key={g.id}
                   type="button"
-                  role="tab"
                   title={g.fullName}
-                  aria-selected={active}
+                  aria-pressed={active}
                   onClick={() => handleSelectGranth(g.id)}
-                  className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-colors whitespace-nowrap cursor-pointer min-h-[36px] ${
+                  className={`rounded-lg px-3 py-1.5 text-xs font-medium whitespace-nowrap cursor-pointer min-h-[36px] ${
                     active
                       ? 'bg-[var(--accent-navy)] text-white dark:text-[#0B1220]'
                       : 'bg-[var(--surface-subtle)] text-[var(--ink-secondary)] hover:text-[var(--ink-primary)]'
@@ -366,7 +365,7 @@ export const ScriptureReader: React.FC<ScriptureReaderProps> = ({
               type="button"
               onClick={() => setShowBookmarksPanel((v) => !v)}
               aria-expanded={showBookmarksPanel}
-              className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer min-h-[36px] whitespace-nowrap ${
+              className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-medium cursor-pointer min-h-[36px] whitespace-nowrap ${
                 showBookmarksPanel
                   ? 'border-[var(--accent-gold)] bg-[var(--accent-gold-soft)] text-[var(--ink-primary)]'
                   : 'pothi-divider text-[var(--ink-secondary)] hover:bg-[var(--surface-subtle)]'
@@ -495,9 +494,9 @@ export const ScriptureReader: React.FC<ScriptureReaderProps> = ({
                     ang: angNum,
                   });
                 }}
-                className={`rounded-md px-2.5 py-1 font-mono-nums transition-colors cursor-pointer ${
+                className={`rounded-md px-2.5 py-1 font-mono-nums cursor-pointer ${
                   isCurrent
-                    ? 'bg-[var(--accent-gold)] text-white font-semibold'
+                    ? 'bg-[var(--accent-gold)] text-white dark:text-[#0B1220] font-semibold'
                     : 'bg-[var(--surface-subtle)] text-[var(--ink-secondary)] hover:text-[var(--ink-primary)]'
                 }`}
               >
@@ -519,7 +518,7 @@ export const ScriptureReader: React.FC<ScriptureReaderProps> = ({
               type="button"
               aria-pressed={settings.larivaar}
               onClick={() => onUpdateSettings({ larivaar: !settings.larivaar })}
-              className={`rounded-lg border px-3 py-2 text-xs font-medium transition-colors cursor-pointer min-h-[38px] ${
+              className={`rounded-lg border px-3 py-2 text-xs font-medium cursor-pointer min-h-[38px] ${
                 settings.larivaar
                   ? 'border-[var(--accent-gold)] bg-[var(--accent-gold-soft)] text-[var(--accent-gold)]'
                   : 'pothi-divider text-[var(--ink-secondary)] hover:text-[var(--ink-primary)]'
@@ -536,7 +535,7 @@ export const ScriptureReader: React.FC<ScriptureReaderProps> = ({
                   showTransliteration: !settings.showTransliteration,
                 })
               }
-              className={`rounded-lg border px-3 py-2 text-xs font-medium transition-colors cursor-pointer min-h-[38px] ${
+              className={`rounded-lg border px-3 py-2 text-xs font-medium cursor-pointer min-h-[38px] ${
                 settings.showTransliteration
                   ? 'border-[var(--accent-gold)] bg-[var(--accent-gold-soft)] text-[var(--accent-gold)]'
                   : 'pothi-divider text-[var(--ink-secondary)] hover:text-[var(--ink-primary)]'
@@ -554,7 +553,7 @@ export const ScriptureReader: React.FC<ScriptureReaderProps> = ({
                 })
               }
               title="Prompt before accidentally reloading or closing the tab during Paath"
-              className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-colors cursor-pointer min-h-[38px] ${
+              className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium cursor-pointer min-h-[38px] ${
                 settings.paathExitGuard
                   ? 'border-[var(--accent-gold)] bg-[var(--accent-gold-soft)] text-[var(--accent-gold)]'
                   : 'pothi-divider text-[var(--ink-secondary)] hover:text-[var(--ink-primary)]'
@@ -609,7 +608,7 @@ export const ScriptureReader: React.FC<ScriptureReaderProps> = ({
                     type="button"
                     aria-pressed={active}
                     onClick={() => onUpdateSettings({ theme: t.id as ThemeMode })}
-                    className={`flex-1 inline-flex items-center justify-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors cursor-pointer ${
+                    className={`flex-1 inline-flex items-center justify-center gap-1 rounded-md px-2.5 py-1.5 text-xs font-medium cursor-pointer ${
                       active
                         ? 'bg-[var(--surface-card)] text-[var(--ink-primary)] shadow-xs'
                         : 'text-[var(--ink-muted)] hover:text-[var(--ink-primary)]'
@@ -663,7 +662,7 @@ export const ScriptureReader: React.FC<ScriptureReaderProps> = ({
               type="button"
               onClick={() => onToggleBookmark(resolved.bookmarkCandidate)}
               aria-pressed={isBookmarked}
-              className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-colors cursor-pointer min-h-[40px] whitespace-nowrap ${
+              className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium cursor-pointer min-h-[40px] whitespace-nowrap ${
                 isBookmarked
                   ? 'border-[var(--accent-gold)] bg-[var(--accent-gold-soft)] text-[var(--ink-primary)]'
                   : 'pothi-divider text-[var(--ink-secondary)] hover:border-[var(--accent-gold)] hover:text-[var(--ink-primary)]'

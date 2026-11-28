@@ -54,7 +54,7 @@ export class ErrorBoundary extends React.Component<
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#FAF6EE] text-[#14213D] px-4 py-10">
         <div className="w-full max-w-md rounded-xl border border-[#D9CEB8] bg-[#FFFDF8] p-6 shadow-sm text-center space-y-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#9A6B16]">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#7A4900]">
             Tatkhalsa Web Pothi
           </p>
           <h1 className="text-2xl font-serif font-semibold text-[#14213D]">
@@ -73,14 +73,14 @@ export class ErrorBoundary extends React.Component<
             <button
               type="button"
               onClick={this.handleReload}
-              className="rounded-lg bg-[#14213D] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#1E3158] transition-colors cursor-pointer"
+              className="rounded-lg bg-[#14213D] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#1E3158] cursor-pointer"
             >
               Reload Pothi Sahib
             </button>
             <button
               type="button"
               onClick={this.handleResetAndReload}
-              className="rounded-lg border border-[#D9CEB8] bg-white px-4 py-2.5 text-sm font-medium text-[#14213D] hover:bg-[#F4EFE4] transition-colors cursor-pointer"
+              className="rounded-lg border border-[#D9CEB8] bg-white px-4 py-2.5 text-sm font-medium text-[#14213D] hover:bg-[#F4EFE4] cursor-pointer"
             >
               Reset Local State
             </button>

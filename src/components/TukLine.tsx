@@ -26,7 +26,7 @@ export const TukLine: React.FC<TukLineProps> = ({
   return (
     <article
       onClick={onSelect}
-      className={`py-5 border-b pothi-divider last:border-b-0 transition-colors ${
+      className={`py-5 border-b pothi-divider last:border-b-0 ${
         highlighted
           ? 'bg-[var(--accent-gold-soft)] -mx-4 px-4 rounded-xl border-transparent'
           : ''

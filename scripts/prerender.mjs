@@ -107,8 +107,24 @@ function injectRouteMetadata(html, route) {
       `<meta name="twitter:description" content="${safeDesc}" />`,
     );
 
+  // Preload the hashed hero WebP LCP image on the home route so mobile browsers discover it immediately
+  if (route.path === '/') {
+    const assetsDir = path.join(distDir, 'assets');
+    if (fs.existsSync(assetsDir)) {
+      const heroWebp = fs
+        .readdirSync(assetsDir)
+        .find((f) => /^hero_pothi_parchment.*\.webp$/i.test(f));
+      if (heroWebp && !out.includes(heroWebp)) {
+        out = out.replace(
+          '</head>',
+          `    <link rel="preload" as="image" href="/assets/${heroWebp}" type="image/webp" fetchpriority="high" />\n  </head>`,
+        );
+      }
+    }
+  }
+
   const crawlerFallback = `
-    <noscript>
+    <noscript data-prerender="crawler">
       <main style="max-width:720px;margin:2rem auto;padding:1.5rem;font-family:system-ui,sans-serif;line-height:1.6;">
         <h1>${escapeAttr(route.heading)}</h1>
         <p>${escapeAttr(route.summary)}</p>
@@ -123,7 +139,7 @@ function injectRouteMetadata(html, route) {
       </main>
     </noscript>`;
 
-  out = out.replace(/<noscript>[\s\S]*?<\/noscript>/gi, '');
+  out = out.replace(/<noscript\s+data-prerender="crawler">[\s\S]*?<\/noscript>/gi, '');
   out = out.replace('<div id="root"></div>', `<div id="root"></div>${crawlerFallback}`);
   return out;
 }

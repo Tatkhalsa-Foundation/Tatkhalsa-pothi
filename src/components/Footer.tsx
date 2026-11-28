@@ -25,44 +25,44 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           <button
             type="button"
             onClick={() => onNavigate('/')}
-            className="hover:text-[var(--accent-gold)] transition-colors cursor-pointer"
+            className="hover:text-[var(--accent-gold)] cursor-pointer"
           >
             Pothi Vault
           </button>
           <button
             type="button"
             onClick={() => onNavigate('/searcher')}
-            className="hover:text-[var(--accent-gold)] transition-colors cursor-pointer"
+            className="hover:text-[var(--accent-gold)] cursor-pointer"
           >
             Gurbani Searcher
           </button>
           <button
             type="button"
             onClick={() => onNavigate('/gutka')}
-            className="hover:text-[var(--accent-gold)] transition-colors cursor-pointer"
+            className="hover:text-[var(--accent-gold)] cursor-pointer"
           >
             Sundar Gutka
           </button>
           <button
             type="button"
             onClick={() => onNavigate('/reader')}
-            className="hover:text-[var(--accent-gold)] transition-colors cursor-pointer"
+            className="hover:text-[var(--accent-gold)] cursor-pointer"
           >
             Sehaj Paath Reader
           </button>
           <button
             type="button"
             onClick={() => onNavigate('/pothi-present')}
-            className="hover:text-[var(--accent-gold)] transition-colors cursor-pointer"
+            className="hover:text-[var(--accent-gold)] cursor-pointer"
           >
             Presenter Mode
           </button>
-          <span aria-hidden="true" className="text-[var(--border-subtle)]">|</span>
+          <span aria-hidden="true" className="text-[var(--border-strong)]">|</span>
           <a
             href="https://tatkhalsa.in"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:text-[var(--accent-gold)] transition-colors"
+            className="hover:text-[var(--accent-gold)]"
           >
             tatkhalsa.in
           </a>
@@ -70,7 +70,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             href="https://calendar.tatkhalsa.in"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:text-[var(--accent-gold)] transition-colors"
+            className="hover:text-[var(--accent-gold)]"
           >
             calendar.tatkhalsa.in
           </a>

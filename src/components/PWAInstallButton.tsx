@@ -18,7 +18,7 @@ export const PWAInstallButton: React.FC = () => {
           void install();
         }}
         aria-label="Install Tatkhalsa Pothi Sahib offline app"
-        className="inline-flex items-center gap-1.5 rounded-lg border pothi-divider bg-[var(--surface-card)] px-3 py-2 text-xs font-medium text-[var(--ink-primary)] hover:border-[var(--accent-gold)] transition-colors whitespace-nowrap shrink-0 min-h-[38px] cursor-pointer"
+        className="inline-flex items-center gap-1.5 rounded-lg border pothi-divider bg-[var(--surface-card)] px-3 py-2 text-xs font-medium text-[var(--ink-primary)] hover:border-[var(--accent-gold)] whitespace-nowrap shrink-0 min-h-[38px] cursor-pointer"
       >
         <Download className="h-3.5 w-3.5 text-[var(--accent-gold)]" aria-hidden="true" />
         <span>Install App</span>
@@ -33,7 +33,7 @@ export const PWAInstallButton: React.FC = () => {
           type="button"
           onClick={() => setShowIOSGuide(true)}
           aria-label="Install Tatkhalsa Pothi Sahib on iOS"
-          className="inline-flex items-center gap-1.5 rounded-lg border pothi-divider bg-[var(--surface-card)] px-3 py-2 text-xs font-medium text-[var(--ink-primary)] hover:border-[var(--accent-gold)] transition-colors whitespace-nowrap shrink-0 min-h-[38px] cursor-pointer"
+          className="inline-flex items-center gap-1.5 rounded-lg border pothi-divider bg-[var(--surface-card)] px-3 py-2 text-xs font-medium text-[var(--ink-primary)] hover:border-[var(--accent-gold)] whitespace-nowrap shrink-0 min-h-[38px] cursor-pointer"
         >
           <Download className="h-3.5 w-3.5 text-[var(--accent-gold)]" aria-hidden="true" />
           <span>Install</span>

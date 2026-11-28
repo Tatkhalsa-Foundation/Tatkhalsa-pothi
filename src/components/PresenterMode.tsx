@@ -222,14 +222,14 @@ export const PresenterMode: React.FC<PresenterModeProps> = ({
       ? 'border-[#d6cab2] bg-[#FAF5E8]/95 text-[#2c2116]'
       : 'border-white/12 bg-black/45 text-slate-200';
 
-  const goldAccent = palette === 'parchment' ? 'text-[#9a600c]' : 'text-[#D4AF37]';
+  const goldAccent = palette === 'parchment' ? 'text-[#7a4900]' : 'text-[#e0be4c]';
 
   const phoneticRoman = activeTuk ? transliterateGurmukhi(activeTuk.gurmukhi) : '';
 
   return (
     <div
       data-testid="presenter-stage"
-      className={`fixed inset-0 z-50 flex flex-col justify-between transition-colors ${paletteClasses}`}
+      className={`fixed inset-0 z-50 flex flex-col justify-between ${paletteClasses}`}
     >
       {/* Top Quiet Projection Header */}
       <header className="flex items-center justify-between gap-4 px-6 py-4 opacity-90">
@@ -281,7 +281,7 @@ export const PresenterMode: React.FC<PresenterModeProps> = ({
             type="button"
             onClick={onExit}
             aria-label="Exit Presenter Mode"
-            className={`inline-flex items-center gap-1.5 rounded-lg border px-3.5 py-2 text-xs font-medium transition-colors cursor-pointer min-h-[38px] ${
+            className={`inline-flex items-center gap-1.5 rounded-lg border px-3.5 py-2 text-xs font-medium cursor-pointer min-h-[38px] ${
               palette === 'parchment'
                 ? 'border-[#cfc2a8] bg-white text-[#241b12] hover:bg-[#efe6d5]'
                 : 'border-white/20 bg-white/10 text-white hover:bg-white/20'

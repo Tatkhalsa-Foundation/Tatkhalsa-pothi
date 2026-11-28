@@ -294,7 +294,7 @@ export const GurbaniSearcher: React.FC<GurbaniSearcherProps> = ({
 
             <button
               type="submit"
-              className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--accent-navy)] px-3.5 py-2 text-xs font-medium text-white dark:text-[#0B1220] hover:bg-[var(--accent-navy-hover)] transition-colors cursor-pointer min-h-[40px] whitespace-nowrap shrink-0"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-[var(--accent-navy)] px-3.5 py-2 text-xs font-medium text-white dark:text-[#0B1220] hover:bg-[var(--accent-navy-hover)] cursor-pointer min-h-[40px] whitespace-nowrap shrink-0"
             >
               Jump
               <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
@@ -344,7 +344,7 @@ export const GurbaniSearcher: React.FC<GurbaniSearcherProps> = ({
               onClick={() => setShowKeyboard((v) => !v)}
               aria-expanded={showKeyboard}
               aria-label="Toggle Gurmukhi first-letter keyboard"
-              className={`inline-flex h-9 items-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium transition-colors cursor-pointer ${
+              className={`inline-flex h-9 items-center gap-1.5 rounded-lg border px-2.5 text-xs font-medium cursor-pointer ${
                 showKeyboard
                   ? 'border-[var(--accent-gold)] bg-[var(--accent-gold-soft)] text-[var(--accent-gold)]'
                   : 'pothi-divider text-[var(--ink-secondary)] hover:bg-[var(--surface-subtle)]'
@@ -364,7 +364,7 @@ export const GurbaniSearcher: React.FC<GurbaniSearcherProps> = ({
               key={ex.query}
               type="button"
               onClick={() => setQuery(ex.query)}
-              className="text-[var(--ink-secondary)] hover:text-[var(--accent-gold)] transition-colors cursor-pointer"
+              className="text-[var(--ink-secondary)] hover:text-[var(--accent-gold)] cursor-pointer"
             >
               <span className="font-gurmukhi-noto font-medium text-[var(--ink-primary)]">
                 {ex.label}
@@ -398,7 +398,7 @@ export const GurbaniSearcher: React.FC<GurbaniSearcherProps> = ({
                   key={ch}
                   type="button"
                   onClick={() => handleVirtualKey(ch)}
-                  className="font-gurmukhi-noto h-10 rounded-lg border pothi-divider bg-[var(--surface-card)] text-lg text-[var(--ink-primary)] hover:border-[var(--accent-gold)] hover:bg-[var(--accent-gold-soft)] transition-colors cursor-pointer"
+                  className="font-gurmukhi-noto h-10 rounded-lg border pothi-divider bg-[var(--surface-card)] text-lg text-[var(--ink-primary)] hover:border-[var(--accent-gold)] hover:bg-[var(--accent-gold-soft)] cursor-pointer"
                 >
                   {ch}
                 </button>
@@ -410,16 +410,15 @@ export const GurbaniSearcher: React.FC<GurbaniSearcherProps> = ({
         {/* Granth Filter Tabs + Saved Bookmarks Filter */}
         <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t pothi-divider">
           <div
-            role="tablist"
+            role="group"
             aria-label="Filter by Granth source"
             className="flex flex-wrap items-center gap-1.5"
           >
             <button
               type="button"
-              role="tab"
-              aria-selected={granthFilter === 'all'}
+              aria-pressed={granthFilter === 'all'}
               onClick={() => setGranthFilter('all')}
-              className={`rounded-lg px-3.5 py-2 text-xs font-medium transition-colors whitespace-nowrap cursor-pointer min-h-[38px] ${
+              className={`rounded-lg px-3.5 py-2 text-xs font-medium whitespace-nowrap cursor-pointer min-h-[38px] ${
                 granthFilter === 'all'
                   ? 'bg-[var(--accent-navy)] text-white dark:text-[#0B1220]'
                   : 'bg-[var(--surface-subtle)] text-[var(--ink-secondary)] hover:text-[var(--ink-primary)]'
@@ -433,10 +432,9 @@ export const GurbaniSearcher: React.FC<GurbaniSearcherProps> = ({
                 <button
                   key={g.id}
                   type="button"
-                  role="tab"
-                  aria-selected={active}
+                  aria-pressed={active}
                   onClick={() => setGranthFilter(g.id)}
-                  className={`rounded-lg px-3.5 py-2 text-xs font-medium transition-colors whitespace-nowrap cursor-pointer min-h-[38px] ${
+                  className={`rounded-lg px-3.5 py-2 text-xs font-medium whitespace-nowrap cursor-pointer min-h-[38px] ${
                     active
                       ? 'bg-[var(--accent-navy)] text-white dark:text-[#0B1220]'
                       : 'bg-[var(--surface-subtle)] text-[var(--ink-secondary)] hover:text-[var(--ink-primary)]'
@@ -452,7 +450,7 @@ export const GurbaniSearcher: React.FC<GurbaniSearcherProps> = ({
             type="button"
             aria-pressed={savedOnly}
             onClick={() => setSavedOnly((v) => !v)}
-            className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium transition-colors whitespace-nowrap cursor-pointer min-h-[38px] ${
+            className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-medium whitespace-nowrap cursor-pointer min-h-[38px] ${
               savedOnly
                 ? 'border-[var(--accent-gold)] bg-[var(--accent-gold-soft)] text-[var(--ink-primary)]'
                 : 'pothi-divider text-[var(--ink-secondary)] hover:bg-[var(--surface-subtle)]'
@@ -525,7 +523,7 @@ export const GurbaniSearcher: React.FC<GurbaniSearcherProps> = ({
                   return (
                     <div
                       key={shabad.id}
-                      className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-[var(--surface-subtle)]/50 transition-colors"
+                      className="p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-[var(--surface-subtle)]/50"
                     >
                       <button
                         type="button"
@@ -570,7 +568,7 @@ export const GurbaniSearcher: React.FC<GurbaniSearcherProps> = ({
                               ? `Remove ${shabad.titleEnglish} from bookmarks`
                               : `Bookmark ${shabad.titleEnglish}`
                           }
-                          className={`inline-flex h-[38px] w-[38px] items-center justify-center rounded-lg border transition-colors cursor-pointer ${
+                          className={`inline-flex h-[38px] w-[38px] items-center justify-center rounded-lg border cursor-pointer ${
                             isSaved
                               ? 'border-[var(--accent-gold)] bg-[var(--accent-gold-soft)] text-[var(--accent-gold)]'
                               : 'pothi-divider text-[var(--ink-muted)] hover:border-[var(--accent-gold)] hover:text-[var(--ink-primary)]'
@@ -658,7 +656,7 @@ export const GurbaniSearcher: React.FC<GurbaniSearcherProps> = ({
                   return (
                     <div
                       key={`${res.shabadId}-${res.tukId}`}
-                      className="p-5 flex flex-col sm:flex-row sm:items-start justify-between gap-4 hover:bg-[var(--surface-subtle)]/50 transition-colors"
+                      className="p-5 flex flex-col sm:flex-row sm:items-start justify-between gap-4 hover:bg-[var(--surface-subtle)]/50"
                     >
                       <button
                         type="button"
@@ -712,7 +710,7 @@ export const GurbaniSearcher: React.FC<GurbaniSearcherProps> = ({
                               onClick={() => onToggleBookmark(makeBookmarkPayload(shabad))}
                               aria-pressed={isSaved}
                               aria-label={isSaved ? 'Remove bookmark' : 'Bookmark Shabad'}
-                              className={`inline-flex h-[36px] w-[36px] items-center justify-center rounded-lg border transition-colors cursor-pointer ${
+                              className={`inline-flex h-[36px] w-[36px] items-center justify-center rounded-lg border cursor-pointer ${
                                 isSaved
                                   ? 'border-[var(--accent-gold)] bg-[var(--accent-gold-soft)] text-[var(--accent-gold)]'
                                   : 'pothi-divider text-[var(--ink-muted)] hover:border-[var(--accent-gold)]'
