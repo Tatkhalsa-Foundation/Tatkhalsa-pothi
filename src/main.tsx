@@ -1,6 +1,5 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { registerSW } from 'virtual:pwa-register';
 import './index.css';
 import App from './App';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -47,28 +46,41 @@ window.addEventListener(
   true,
 );
 
-// Purge obsolete legacy cache namespaces from older versions while keeping Workbox PWA caches
-if (typeof window !== 'undefined' && 'caches' in window) {
-  window.caches
-    .keys()
-    .then((keys) => {
-      keys
-        .filter((k) => k.startsWith('tatkhalsa-pwa-') || k.startsWith('tatkhalsa-gurbani-db-'))
-        .forEach((k) => {
-          window.caches.delete(k).catch(() => {});
-        });
-    })
-    .catch(() => {});
-}
+// Defer PWA service worker registration and legacy cache cleanup until after initial load/LCP
+if (typeof window !== 'undefined') {
+  const registerDeferredPWA = () => {
+    if ('caches' in window) {
+      window.caches
+        .keys()
+        .then((keys) => {
+          keys
+            .filter((k) => k.startsWith('tatkhalsa-pwa-') || k.startsWith('tatkhalsa-gurbani-db-'))
+            .forEach((k) => {
+              window.caches.delete(k).catch(() => {});
+            });
+        })
+        .catch(() => {});
+    }
 
-// Register auto-updating Workbox PWA Service Worker for offline Sundar Gutka & Pothi access
-if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-  registerSW({
-    immediate: true,
-    onRegisterError() {
-      // Non-fatal in preview iframes or restricted environments
-    },
-  });
+    if ('serviceWorker' in navigator) {
+      import('virtual:pwa-register')
+        .then(({ registerSW }) => {
+          registerSW({
+            immediate: true,
+            onRegisterError() {
+              // Non-fatal in preview iframes or restricted environments
+            },
+          });
+        })
+        .catch(() => {});
+    }
+  };
+
+  if (document.readyState === 'complete') {
+    registerDeferredPWA();
+  } else {
+    window.addEventListener('load', registerDeferredPWA, { once: true });
+  }
 }
 
 const rootEl = document.getElementById('root');

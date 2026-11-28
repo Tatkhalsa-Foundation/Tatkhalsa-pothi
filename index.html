@@ -75,6 +75,61 @@
       })();
     </script>
 
+    <!-- Minimal critical theme & base shell CSS for zero-FOUC/zero-CLS while full stylesheet loads asynchronously -->
+    <style>
+      :root {
+        --surface-canvas: #faf9f6;
+        --surface-card: #ffffff;
+        --surface-subtle: #f3f0e8;
+        --border-hairline: #e5e0d5;
+        --border-strong: #cfc6b4;
+        --ink-primary: #0f172a;
+        --ink-secondary: #333e52;
+        --ink-muted: #4b5568;
+        --accent-gold: #855200;
+        --accent-gold-soft: #f5ebd6;
+        --accent-navy: #0f172a;
+        --accent-navy-hover: #1e2d4a;
+      }
+      .theme-parchment {
+        --surface-canvas: #f5ebd6;
+        --surface-card: #faf5e8;
+        --surface-subtle: #ede0c6;
+        --border-hairline: #ddd0b5;
+        --border-strong: #c4b18d;
+        --ink-primary: #22190f;
+        --ink-secondary: #473626;
+        --ink-muted: #594735;
+        --accent-gold: #7a4900;
+        --accent-gold-soft: #eadbc0;
+        --accent-navy: #0f172a;
+        --accent-navy-hover: #1e2d4a;
+      }
+      .dark {
+        --surface-canvas: #0b1220;
+        --surface-card: #121c2e;
+        --surface-subtle: #1a2740;
+        --border-hairline: #283856;
+        --border-strong: #3c5177;
+        --ink-primary: #f4efe6;
+        --ink-secondary: #d3dce9;
+        --ink-muted: #a9b6cd;
+        --accent-gold: #e0be4c;
+        --accent-gold-soft: rgba(224, 190, 76, 0.18);
+        --accent-navy: #e0be4c;
+        --accent-navy-hover: #edd06c;
+      }
+      html,
+      body {
+        margin: 0;
+        background-color: var(--surface-canvas);
+        color: var(--ink-primary);
+        font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+    </style>
+
     <!-- Schema.org Structured Data -->
     <script type="application/ld+json">
       {

@@ -103,7 +103,7 @@ export const HomeVault: React.FC<HomeVaultProps> = ({
               width={800}
               height={446}
               fetchPriority="high"
-              decoding="async"
+              decoding="sync"
               referrerPolicy="no-referrer"
               onError={() => setHeroImgFailed(true)}
               className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-20 dark:opacity-12"

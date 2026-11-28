@@ -107,7 +107,14 @@ function injectRouteMetadata(html, route) {
       `<meta name="twitter:description" content="${safeDesc}" />`,
     );
 
-  // Preload the hashed hero WebP LCP image on the home route so mobile browsers discover it immediately
+  // Convert Vite-emitted CSS stylesheets to non-blocking preload + onload (with noscript fallback)
+  out = out.replace(
+    /<link\s+rel="stylesheet"\s+([^>]*href="\/assets\/[^"]+\.css"[^>]*)\/?>/gi,
+    (_match, attrs) =>
+      `<link rel="preload" as="style" ${attrs} onload="this.onload=null;this.rel='stylesheet'" /><noscript data-prerender="css-fallback"><link rel="stylesheet" ${attrs} /></noscript>`,
+  );
+
+  // Preload the hashed hero WebP LCP image right after viewport meta on the home route for earliest discovery
   if (route.path === '/') {
     const assetsDir = path.join(distDir, 'assets');
     if (fs.existsSync(assetsDir)) {
@@ -116,8 +123,8 @@ function injectRouteMetadata(html, route) {
         .find((f) => /^hero_pothi_parchment.*\.webp$/i.test(f));
       if (heroWebp && !out.includes(heroWebp)) {
         out = out.replace(
-          '</head>',
-          `    <link rel="preload" as="image" href="/assets/${heroWebp}" type="image/webp" fetchpriority="high" />\n  </head>`,
+          /(<meta\s+name="viewport"[^>]*\/>)/i,
+          `$1\n    <link rel="preload" as="image" href="/assets/${heroWebp}" type="image/webp" fetchpriority="high" />`,
         );
       }
     }

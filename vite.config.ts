@@ -111,9 +111,6 @@ export default defineConfig({
       output: {
         manualChunks(id) {
           if (id.includes('node_modules')) {
-            if (id.includes('lucide-react')) {
-              return 'vendor-icons';
-            }
             if (
               id.includes('/react/') ||
               id.includes('/react-dom/') ||
@@ -125,8 +122,7 @@ export default defineConfig({
           if (
             id.includes('/src/data/gurbaniCorpus') ||
             id.includes('/src/data/sampardaiPothis') ||
-            id.includes('/src/data/nitnemBaanis') ||
-            id.includes('/src/data/fullSearchCorpus')
+            id.includes('/src/data/nitnemBaanis')
           ) {
             return 'corpus-gurbani';
           }

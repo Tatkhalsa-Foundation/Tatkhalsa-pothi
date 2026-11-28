@@ -1,15 +1,9 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { Suspense, lazy, useCallback, useEffect, useState } from 'react';
 import { Footer } from './components/Footer';
-import { GurbaniSearcher } from './components/GurbaniSearcher';
 import { HomeVault } from './components/HomeVault';
 import { Navbar } from './components/Navbar';
 import { OfflineIndicator } from './components/PWAInstallButton';
-import { PresenterMode } from './components/PresenterMode';
-import { QueueDrawer } from './components/QueueDrawer';
-import { ScriptureReader } from './components/ScriptureReader';
-import { SundarGutka } from './components/SundarGutka';
-import { FULL_SEARCH_CORPUS } from './data/fullSearchCorpus';
-import { GRANTH_CATALOG } from './data/gurbaniCorpus';
+import { GRANTH_CATALOG, GURBANI_CORPUS } from './data/gurbaniCorpus';
 import type {
   AppRoute,
   BaaniCollection,
@@ -37,6 +31,32 @@ import {
   toggleBookmark,
   updateGranthAng,
 } from './utils/pothiState';
+
+const GurbaniSearcher = lazy(() =>
+  import('./components/GurbaniSearcher').then((m) => ({ default: m.GurbaniSearcher })),
+);
+const SundarGutka = lazy(() =>
+  import('./components/SundarGutka').then((m) => ({ default: m.SundarGutka })),
+);
+const ScriptureReader = lazy(() =>
+  import('./components/ScriptureReader').then((m) => ({ default: m.ScriptureReader })),
+);
+const PresenterMode = lazy(() =>
+  import('./components/PresenterMode').then((m) => ({ default: m.PresenterMode })),
+);
+const QueueDrawer = lazy(() =>
+  import('./components/QueueDrawer').then((m) => ({ default: m.QueueDrawer })),
+);
+
+const RouteLoadingFallback: React.FC = () => (
+  <div
+    role="status"
+    aria-live="polite"
+    className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 py-16 text-center text-sm text-[var(--ink-muted)]"
+  >
+    Opening Pothi Sahib view…
+  </div>
+);
 
 const STORAGE_KEYS = {
   pothiId: 'tatkhalsa.pothi.activePothiId',
@@ -314,8 +334,7 @@ export const App: React.FC = () => {
 
   const handleOpenShabad = useCallback(
     (shabadId: string, highlightTukId?: string) => {
-      const found = FULL_SEARCH_CORPUS.find((s) => s.id === shabadId);
-      if (found) {
+      const recordShabadHistory = (found: Shabad) => {
         const meta = GRANTH_CATALOG[found.granth];
         setHistory((prev) =>
           recordHistoryEntry(prev, {
@@ -329,6 +348,18 @@ export const App: React.FC = () => {
             shabadId: found.id,
           }),
         );
+      };
+
+      const found = GURBANI_CORPUS.find((s) => s.id === shabadId);
+      if (found) {
+        recordShabadHistory(found);
+      } else {
+        import('./data/fullSearchCorpus')
+          .then(({ FULL_SEARCH_CORPUS }) => {
+            const match = FULL_SEARCH_CORPUS.find((s) => s.id === shabadId);
+            if (match) recordShabadHistory(match);
+          })
+          .catch(() => {});
       }
       setReaderTarget({ mode: 'shabad', shabadId, highlightTukId });
       navigate('/reader');
@@ -467,13 +498,15 @@ export const App: React.FC = () => {
   if (route === '/pothi-present') {
     return (
       <>
-        <PresenterMode
-          queue={queue}
-          initialQueueIndex={presenterStartIndex}
-          settings={settings}
-          onUpdateSettings={handleUpdateSettings}
-          onExit={() => navigate('/reader')}
-        />
+        <Suspense fallback={<RouteLoadingFallback />}>
+          <PresenterMode
+            queue={queue}
+            initialQueueIndex={presenterStartIndex}
+            settings={settings}
+            onUpdateSettings={handleUpdateSettings}
+            onExit={() => navigate('/reader')}
+          />
+        </Suspense>
         <OfflineIndicator />
       </>
     );
@@ -512,62 +545,72 @@ export const App: React.FC = () => {
         )}
 
         {(route === '/searcher' || route === '/gurbani') && (
-          <GurbaniSearcher
-            onOpenShabad={handleOpenShabad}
-            onOpenAng={handleOpenAng}
-            onOpenBaani={handleOpenBaani}
-            onOpenArdaas={handleOpenArdaas}
-            onEnqueueShabad={handleEnqueueShabad}
-            onToggleBookmark={handleToggleBookmark}
-            bookmarks={bookmarks}
-            queue={queue}
-          />
+          <Suspense fallback={<RouteLoadingFallback />}>
+            <GurbaniSearcher
+              onOpenShabad={handleOpenShabad}
+              onOpenAng={handleOpenAng}
+              onOpenBaani={handleOpenBaani}
+              onOpenArdaas={handleOpenArdaas}
+              onEnqueueShabad={handleEnqueueShabad}
+              onToggleBookmark={handleToggleBookmark}
+              bookmarks={bookmarks}
+              queue={queue}
+            />
+          </Suspense>
         )}
 
         {route === '/gutka' && (
-          <SundarGutka
-            activePothiId={activePothiId}
-            onSelectPothi={setActivePothiId}
-            onOpenBaani={handleOpenBaani}
-            onOpenArdaas={handleOpenArdaas}
-            onEnqueueBaani={handleEnqueueBaani}
-            queue={queue}
-          />
+          <Suspense fallback={<RouteLoadingFallback />}>
+            <SundarGutka
+              activePothiId={activePothiId}
+              onSelectPothi={setActivePothiId}
+              onOpenBaani={handleOpenBaani}
+              onOpenArdaas={handleOpenArdaas}
+              onEnqueueBaani={handleEnqueueBaani}
+              queue={queue}
+            />
+          </Suspense>
         )}
 
         {route === '/reader' && (
-          <ScriptureReader
-            target={readerTarget}
-            onChangeTarget={setReaderTarget}
-            sehajProgress={sehajProgress}
-            onUpdateSehajAng={handleUpdateSehajAng}
-            settings={settings}
-            onUpdateSettings={handleUpdateSettings}
-            queue={queue}
-            onEnqueueCurrent={handleEnqueueItem}
-            onLaunchPresenterWithItem={handleLaunchPresenterWithItem}
-            bookmarks={bookmarks}
-            onToggleBookmark={handleToggleBookmark}
-            onOpenBookmark={handleOpenSavedItem}
-          />
+          <Suspense fallback={<RouteLoadingFallback />}>
+            <ScriptureReader
+              target={readerTarget}
+              onChangeTarget={setReaderTarget}
+              sehajProgress={sehajProgress}
+              onUpdateSehajAng={handleUpdateSehajAng}
+              settings={settings}
+              onUpdateSettings={handleUpdateSettings}
+              queue={queue}
+              onEnqueueCurrent={handleEnqueueItem}
+              onLaunchPresenterWithItem={handleLaunchPresenterWithItem}
+              bookmarks={bookmarks}
+              onToggleBookmark={handleToggleBookmark}
+              onOpenBookmark={handleOpenSavedItem}
+            />
+          </Suspense>
         )}
       </main>
 
       <Footer onNavigate={navigate} />
 
-      <QueueDrawer
-        open={queueOpen}
-        onClose={() => setQueueOpen(false)}
-        queue={queue}
-        onRemove={(id) => setQueue((prev) => removeQueueItem(prev, id))}
-        onMove={(id, dir) => setQueue((prev) => moveQueueItem(prev, id, dir))}
-        onClear={() => setQueue([])}
-        onOpenInReader={handleOpenQueueItemInReader}
-        onLaunchPresenter={(idx = 0) => {
-          setPresenterStartIndex(idx);
-          navigate('/pothi-present');
-        }}
-      />
+      {queueOpen && (
+        <Suspense fallback={null}>
+          <QueueDrawer
+            open={queueOpen}
+            onClose={() => setQueueOpen(false)}
+            queue={queue}
+            onRemove={(id) => setQueue((prev) => removeQueueItem(prev, id))}
+            onMove={(id, dir) => setQueue((prev) => moveQueueItem(prev, id, dir))}
+            onClear={() => setQueue([])}
+            onOpenInReader={handleOpenQueueItemInReader}
+            onLaunchPresenter={(idx = 0) => {
+              setPresenterStartIndex(idx);
+              navigate('/pothi-present');
+            }}
+          />
+        </Suspense>
+      )}
 
       <OfflineIndicator />
     </div>
