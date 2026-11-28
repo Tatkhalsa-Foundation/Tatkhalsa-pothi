@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preload" as="image" href="/assets/hero_pothi_parchment-Cf9yvu3o.webp" type="image/webp" fetchpriority="high" />
+    <title>Tatkhalsa Pothi Sahib – Sundar Gutka, Sehaj Paath &amp; Gurbani Searcher</title>
+    <meta name="description" content="100% Free Seva public-domain Unicode Gurmukhi Pothi Sahib, Sundar Gutka across 15 isolated Sampardai Maryadas, Sehaj Paath Reader, Presenter Mode, and self-contained Gurbani Searcher by Tatkhalsa Foundation." />
+    <link rel="canonical" href="https://pothi.tatkhalsa.in/" />
+
+    <!-- OpenGraph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Tatkhalsa Pothi Sahib" />
+    <meta property="og:url" content="https://pothi.tatkhalsa.in/" />
+    <meta property="og:title" content="Tatkhalsa Pothi Sahib – Sundar Gutka, Sehaj Paath &amp; Gurbani Searcher" />
+    <meta property="og:description" content="100% Free Seva public-domain Unicode Gurmukhi Pothi Sahib, Sundar Gutka across 15 isolated Sampardai Maryadas, Sehaj Paath Reader, Presenter Mode, and self-contained Gurbani Searcher by Tatkhalsa Foundation." />
+
+    <!-- Twitter / X -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Tatkhalsa Pothi Sahib – Sundar Gutka, Sehaj Paath &amp; Gurbani Searcher" />
+    <meta name="twitter:description" content="100% Free Seva public-domain Unicode Gurmukhi Pothi Sahib, Sundar Gutka across 15 isolated Sampardai Maryadas, Sehaj Paath Reader, Presenter Mode, and self-contained Gurbani Searcher by Tatkhalsa Foundation." />
+
+    <meta name="theme-color" content="#0B1220" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Pothi Sahib" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+
+    <!-- Fonts: Fraunces (Display), Plus Jakarta Sans (UI), Noto Sans Gurmukhi (Standard Unicode Gurmukhi), JetBrains Mono (Numerals) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+Gurmukhi:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+      onload="this.onload=null;this.rel='stylesheet'"
+    />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=JetBrains+Mono:wght@400;500&family=Noto+Sans+Gurmukhi:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
+
+    <!-- Apply saved/default theme synchronously before first paint to prevent FOUC and initial paint transitions -->
+    <script>
+      (function () {
+        try {
+          var raw = localStorage.getItem('tatkhalsa.pothi.readerSettings');
+          var theme = raw ? JSON.parse(raw).theme : 'parchment';
+          if (theme === 'dark') {
+            document.documentElement.classList.add('dark');
+          } else if (theme !== 'light') {
+            document.documentElement.classList.add('theme-parchment');
+          }
+        } catch (e) {
+          document.documentElement.classList.add('theme-parchment');
+        }
+      })();
+    </script>
+
+    <!-- Minimal critical theme & base shell CSS for zero-FOUC/zero-CLS while full stylesheet loads asynchronously -->
+    <style>
+      :root {
+        --surface-canvas: #faf9f6;
+        --surface-card: #ffffff;
+        --surface-subtle: #f3f0e8;
+        --border-hairline: #e5e0d5;
+        --border-strong: #cfc6b4;
+        --ink-primary: #0f172a;
+        --ink-secondary: #333e52;
+        --ink-muted: #4b5568;
+        --accent-gold: #855200;
+        --accent-gold-soft: #f5ebd6;
+        --accent-navy: #0f172a;
+        --accent-navy-hover: #1e2d4a;
+      }
+      .theme-parchment {
+        --surface-canvas: #f5ebd6;
+        --surface-card: #faf5e8;
+        --surface-subtle: #ede0c6;
+        --border-hairline: #ddd0b5;
+        --border-strong: #c4b18d;
+        --ink-primary: #22190f;
+        --ink-secondary: #473626;
+        --ink-muted: #594735;
+        --accent-gold: #7a4900;
+        --accent-gold-soft: #eadbc0;
+        --accent-navy: #0f172a;
+        --accent-navy-hover: #1e2d4a;
+      }
+      .dark {
+        --surface-canvas: #0b1220;
+        --surface-card: #121c2e;
+        --surface-subtle: #1a2740;
+        --border-hairline: #283856;
+        --border-strong: #3c5177;
+        --ink-primary: #f4efe6;
+        --ink-secondary: #d3dce9;
+        --ink-muted: #a9b6cd;
+        --accent-gold: #e0be4c;
+        --accent-gold-soft: rgba(224, 190, 76, 0.18);
+        --accent-navy: #e0be4c;
+        --accent-navy-hover: #edd06c;
+      }
+      html,
+      body {
+        margin: 0;
+        background-color: var(--surface-canvas);
+        color: var(--ink-primary);
+        font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+    </style>
+
+    <!-- Schema.org Structured Data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Tatkhalsa Pothi Sahib",
+        "url": "https://pothi.tatkhalsa.in/",
+        "applicationCategory": "ReferenceApplication",
+        "operatingSystem": "All",
+        "description": "100% Free Seva public-domain Unicode Gurmukhi Pothi Sahib, Sundar Gutka across 15 isolated Sampardai Maryadas, Sehaj Paath Scripture Reader, Presenter Mode, and self-contained Gurbani Searcher by Tatkhalsa Foundation.",
+        "publisher": {
+          "@type": "Organization",
+          "name": "Tatkhalsa Foundation",
+          "url": "https://tatkhalsa.in/"
+        },
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "INR"
+        }
+      }
+    </script>
+    <script type="module" crossorigin src="/assets/index-Om6x3cE9.js"></script>
+    <link rel="modulepreload" crossorigin href="/assets/vendor-react-Bg9W9dCp.js">
+    <link rel="modulepreload" crossorigin href="/assets/corpus-gurbani-C0FH2gja.js">
+    <link rel="preload" as="style" crossorigin href="/assets/index-C-owrZbp.css" onload="this.onload=null;this.rel='stylesheet'" /><noscript data-prerender="css-fallback"><link rel="stylesheet" crossorigin href="/assets/index-C-owrZbp.css" /></noscript>
+  <link rel="manifest" href="/manifest.webmanifest"></head>
+  <body>
+    <div id="root"></div>
+    <noscript data-prerender="crawler">
+      <main style="max-width:720px;margin:2rem auto;padding:1.5rem;font-family:system-ui,sans-serif;line-height:1.6;">
+        <h1>Tatkhalsa Pothi Sahib — 15 Sampardai Pothis Vault</h1>
+        <p>Read Nitnem Sundar Gutka (beginning with Japneesan) across 15 strictly isolated Sampardai Maryadas, track independent Sehaj Paath across Sri Guru Granth Sahib Ji, Sri Guru Dasam Granth Sahib Ji, and Sri Guru Sarabloh Granth Sahib Ji, and search public-domain Unicode Gurmukhi instantly.</p>
+        <p lang="pa">ੴ ਸਤਿ ਨਾਮੁ ਕਰਤਾ ਪੁਰਖੁ ਨਿਰਭਉ ਨਿਰਵੈਰੁ ਅਕਾਲ ਮੂਰਤਿ ਅਜੂਨੀ ਸੈਭੰ ਗੁਰ ਪ੍ਰਸਾਦਿ ॥</p>
+        <nav aria-label="Tatkhalsa Pothi Sahib Sections">
+          <a href="/">Pothi Vault</a> ·
+          <a href="/searcher">Gurbani Searcher</a> ·
+          <a href="/gutka">Sundar Gutka</a> ·
+          <a href="/reader">Sehaj Paath Reader</a> ·
+          <a href="/pothi-present">Presenter Mode</a>
+        </nav>
+      </main>
+    </noscript>
+  </body>
+</html>
